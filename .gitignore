@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.log
+.aegis-sandboxes/
+data/
+.DS_Store
+Thumbs.db

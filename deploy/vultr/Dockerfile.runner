@@ -1,0 +1,12 @@
+# Hardened Unprivileged Sandbox Runner Image for Vultr Cloud Compute
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nodejs \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && groupadd -g 1000 sandbox && useradd -m -u 1000 -g 1000 -s /bin/sh sandbox \
+  && mkdir -p /workspace && chown 1000:1000 /workspace
+
+USER 1000:1000
+WORKDIR /workspace

@@ -1,0 +1,21 @@
+# Isolated Sandbox Worker Daemon (Playwright Headless Chromium + Docker Sibling Runner)
+FROM node:22-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    python3 \
+    docker.io \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV PLAYWRIGHT_EXECUTABLE_PATH=/usr/bin/chromium
+WORKDIR /app
+
+COPY package.json tsconfig.base.json ./
+COPY packages/shared ./packages/shared
+COPY apps/sandbox-worker ./apps/sandbox-worker
+
+RUN npm install && npm --workspace=@aegis/shared run build && npm --workspace=@aegis/sandbox-worker run build
+
+EXPOSE 4100
+CMD ["node", "apps/sandbox-worker/dist/server.js"]

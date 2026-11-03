@@ -1,0 +1,46 @@
+services:
+  # 1. Centralized Control Plane + Web UI (Holds Vultr Serverless Inference & API keys)
+  control-plane:
+    build:
+      context: .
+      dockerfile: deploy/vultr/Dockerfile.control-plane
+    restart: unless-stopped
+    ports:
+      - "80:4000"
+      - "4000:4000"
+    environment:
+      - CONTROL_PLANE_PORT=4000
+      - SANDBOX_WORKER_URL=http://sandbox-worker:4100
+      - SANDBOX_SHARED_SECRET=${SANDBOX_SHARED_SECRET:-aegis-vultr-prod-hmac-secret}
+      - VULTR_INFERENCE_API_KEY=${VULTR_INFERENCE_API_KEY:-}
+      - VULTR_INFERENCE_MODEL=${VULTR_INFERENCE_MODEL:-kimi-k2-instruct}
+      - VULTR_API_KEY=${VULTR_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      - sandbox-worker
+    networks:
+      - aegis-rpc-net
+
+  # 2. Isolated Sandbox Worker Daemon (ZERO LLM/Cloud API keys mounted!)
+  sandbox-worker:
+    build:
+      context: .
+      dockerfile: deploy/vultr/Dockerfile.sandbox-worker
+    restart: unless-stopped
+    environment:
+      - SANDBOX_WORKER_PORT=4100
+      - SANDBOX_SHARED_SECRET=${SANDBOX_SHARED_SECRET:-aegis-vultr-prod-hmac-secret}
+      - SANDBOX_DRIVER=${SANDBOX_DRIVER:-docker}
+      - SANDBOX_DOCKER_IMAGE=aegis-sandbox-runner:latest
+      - SANDBOX_METADATA_LABEL=${SANDBOX_METADATA_LABEL:-vultr-cloud-sandbox-01}
+      - VULTR_INSTANCE_REGION=${VULTR_INSTANCE_REGION:-ewr}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/aegis-vultr-sandboxes:/tmp/aegis-vultr-sandboxes
+    networks:
+      - aegis-rpc-net
+
+networks:
+  aegis-rpc-net:
+    driver: bridge
