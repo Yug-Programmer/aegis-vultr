@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
-  LifeBuoy,
   Play,
   Plus,
   Loader2,
   CheckCircle2,
   AlertOctagon,
   ExternalLink,
+  ChevronDown,
+  X,
 } from 'lucide-react';
 import type { SupportTicket } from '@aegis/shared';
 
@@ -59,205 +60,250 @@ export function SupportOpsView({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-5 max-w-7xl mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-7xl mx-auto w-full">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#242830]">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <LifeBuoy className="w-5 h-5 text-purple-400" />
-            Customer Support — Sandboxed Root-Cause Investigation &amp; Escalation
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Isolates customer webhook payloads, billing logs, and SAML assertions inside a Vultr
-            sandbox—auto-resolving deterministic issues and escalating policy/credit actions.
+          <h1 className="text-2xl font-semibold text-[#F4F4F5] tracking-tight">
+            Customer Support
+          </h1>
+          <p className="text-xs text-[#9CA3AF] mt-1">
+            Sandboxed root-cause investigation, ticket reproduction, and escalation.
           </p>
         </div>
 
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-3.5 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
+          className="px-3.5 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#0B0D10] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition shadow-sm self-start sm:self-auto"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New Support Ticket</span>
+          {showAdd ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          <span>{showAdd ? 'Cancel' : 'New Support Ticket'}</span>
         </button>
       </div>
 
+      {/* Add Ticket Form */}
       {showAdd && (
         <form
           onSubmit={handleCreate}
-          className="rounded-xl border border-purple-500/35 bg-[#120d21] p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs"
+          className="rounded-lg border border-[#242830] bg-[#111419] p-5 space-y-4"
         >
-          <input
-            required
-            placeholder="Enterprise Customer Name"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <select
-            value={category}
-            onChange={(e) =>
-              setCategory(
-                e.target.value as 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security'
-              )
-            }
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          >
-            <option value="API & Webhooks">API &amp; Webhooks</option>
-            <option value="Billing & Ledger">Billing &amp; Ledger</option>
-            <option value="SSO & Security">SSO &amp; Security</option>
-          </select>
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as 'P1' | 'P2' | 'P3')}
-              className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-            >
-              <option value="P1">P1 Critical</option>
-              <option value="P2">P2 High</option>
-              <option value="P3">P3 Normal</option>
-            </select>
-            <select
-              value={customerTier}
-              onChange={(e) => setCustomerTier(e.target.value as 'Enterprise' | 'Growth')}
-              className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-            >
-              <option value="Enterprise">Enterprise</option>
-              <option value="Growth">Growth</option>
-            </select>
+          <div className="text-xs font-semibold text-[#F4F4F5]">
+            Create Support Incident Ticket
           </div>
-          <input
-            required
-            placeholder="Issue Subject / Symptoms"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="sm:col-span-2 rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              placeholder="Requested Credit $"
-              value={requestedCreditUsd}
-              onChange={(e) => setRequestedCreditUsd(Number(e.target.value))}
-              className="w-full rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-slate-100"
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Customer Name</label>
+              <input
+                required
+                placeholder="Enterprise Customer Name"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Category</label>
+              <select
+                value={category}
+                onChange={(e) =>
+                  setCategory(
+                    e.target.value as 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security'
+                  )
+                }
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              >
+                <option value="API & Webhooks">API &amp; Webhooks</option>
+                <option value="Billing & Ledger">Billing &amp; Ledger</option>
+                <option value="SSO & Security">SSO &amp; Security</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] text-[#9CA3AF] mb-1">Priority</label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as 'P1' | 'P2' | 'P3')}
+                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+                >
+                  <option value="P1">P1 Critical</option>
+                  <option value="P2">P2 High</option>
+                  <option value="P3">P3 Normal</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] text-[#9CA3AF] mb-1">Tier</label>
+                <select
+                  value={customerTier}
+                  onChange={(e) => setCustomerTier(e.target.value as 'Enterprise' | 'Growth')}
+                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+                >
+                  <option value="Enterprise">Enterprise</option>
+                  <option value="Growth">Growth</option>
+                </select>
+              </div>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Issue Subject / Symptoms</label>
+              <input
+                required
+                placeholder="Issue Subject / Symptoms"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Requested Credit ($)</label>
+              <input
+                type="number"
+                placeholder="0"
+                value={requestedCreditUsd}
+                onChange={(e) => setRequestedCreditUsd(Number(e.target.value))}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#F4F4F5] outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-purple-500 hover:bg-purple-400 text-slate-950 font-semibold shrink-0 cursor-pointer"
+              className="px-4 py-2 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#0B0D10] font-semibold text-xs cursor-pointer transition"
             >
-              Create
+              Create Incident Ticket
             </button>
           </div>
         </form>
       )}
 
-      <div className="space-y-3">
-        {tickets.map((t) => (
-          <div
-            key={t.id}
-            className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 space-y-3"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-xs font-bold text-purple-300">
-                    {t.ticketNumber}
-                  </span>
+      {/* Ticket List */}
+      <div className="space-y-4">
+        {tickets.map((t) => {
+          const isP1 = t.priority === 'P1';
+          const isInvestigating = t.status === 'investigating';
+          const isResolved = t.status === 'auto_resolved' || t.status === 'resolved';
+          const isEscalated = t.status === 'escalated_human';
+
+          return (
+            <div
+              key={t.id}
+              className={`rounded-lg border bg-[#111419] p-5 space-y-4 transition ${
+                isP1
+                  ? 'border-[#242830] border-l-2 border-l-[#F87171]'
+                  : 'border-[#242830]'
+              }`}
+            >
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                {/* Left Section */}
+                <div className="space-y-1.5 min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="font-mono text-xs text-[#9CA3AF]">
+                      {t.ticketNumber}
+                    </span>
+                    <span
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-medium ${
+                        isP1
+                          ? 'bg-[#F87171]/15 text-[#F87171]'
+                          : 'bg-[#FBBF24]/15 text-[#FBBF24]'
+                      }`}
+                    >
+                      {t.priority}
+                    </span>
+                    <h3 className="text-base font-semibold text-[#F4F4F5] truncate">
+                      {t.subject}
+                    </h3>
+                  </div>
+
+                  <div className="text-xs text-[#9CA3AF] flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-[#F4F4F5]">{t.customerName}</span>
+                    <span className="text-[#6B7280]">·</span>
+                    <span className="text-[#6B7280]">{t.customerTier}</span>
+                    <span className="text-[#6B7280]">·</span>
+                    <span className="font-mono text-[11px] text-[#38BDF8]">{t.category}</span>
+                    {t.requestedCreditUsd ? (
+                      <>
+                        <span className="text-[#6B7280]">·</span>
+                        <span className="font-mono text-[11px] text-[#FBBF24]">
+                          Credit Request: ${t.requestedCreditUsd.toLocaleString()}
+                        </span>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Right Section */}
+                <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
                   <span
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                      t.priority === 'P1'
-                        ? 'bg-rose-500/20 text-rose-300'
-                        : 'bg-amber-500/20 text-amber-300'
+                    className={`text-[11px] font-mono capitalize px-2 py-1 rounded flex items-center gap-1.5 ${
+                      isResolved
+                        ? 'bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30'
+                        : isEscalated
+                          ? 'bg-[#FBBF24]/15 text-[#FBBF24] border border-[#FBBF24]/30'
+                          : 'bg-[#15181E] text-[#9CA3AF] border border-[#242830]'
                     }`}
                   >
-                    {t.priority}
+                    {isResolved && <CheckCircle2 className="w-3 h-3 text-[#34D399]" />}
+                    {isEscalated && <AlertOctagon className="w-3 h-3 text-[#FBBF24]" />}
+                    <span>{t.status.replace('_', ' ')}</span>
                   </span>
-                  <span className="text-sm font-semibold text-white">{t.subject}</span>
-                </div>
-                <div className="text-xs text-slate-400 flex items-center gap-2 flex-wrap">
-                  <span>{t.customerName}</span>
-                  <span>•</span>
-                  <span className="font-mono text-[11px]">{t.customerTier}</span>
-                  <span>•</span>
-                  <span className="font-mono text-[11px] text-sky-400">{t.category}</span>
-                  {t.requestedCreditUsd ? (
-                    <>
-                      <span>•</span>
-                      <span className="font-mono text-[11px] text-amber-300">
-                        Requested Credit: ${t.requestedCreditUsd.toLocaleString()}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-[10px] font-mono uppercase px-2 py-1 rounded border flex items-center gap-1 ${
-                    t.status === 'auto_resolved' || t.status === 'resolved'
-                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
-                      : t.status === 'escalated_human'
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/35'
-                        : 'bg-slate-800 text-slate-300 border-slate-700'
-                  }`}
-                >
-                  {(t.status === 'auto_resolved' || t.status === 'resolved') && (
-                    <CheckCircle2 className="w-3 h-3" />
+                  {t.lastMissionId && (
+                    <button
+                      onClick={() => onInspectMission(t.lastMissionId!)}
+                      className="px-3 py-1.5 rounded-md bg-[#15181E] hover:bg-[#242830] border border-[#242830] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs font-mono flex items-center gap-1.5 cursor-pointer transition"
+                      title="Inspect Diagnostic Findings"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-[#38BDF8]" />
+                      <span>Diagnostics</span>
+                    </button>
                   )}
-                  {t.status === 'escalated_human' && <AlertOctagon className="w-3 h-3" />}
-                  {t.status.replace('_', ' ')}
-                </span>
 
-                {t.lastMissionId && (
                   <button
-                    onClick={() => onInspectMission(t.lastMissionId!)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => void onInvestigateTicket(t.id)}
+                    disabled={isBusy || isInvestigating}
+                    className="px-3.5 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition shadow-sm"
                   >
-                    <ExternalLink className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Diagnostic SVG</span>
+                    {isInvestigating ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Diagnosing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Investigate in Sandbox</span>
+                      </>
+                    )}
                   </button>
-                )}
-
-                <button
-                  onClick={() => void onInvestigateTicket(t.id)}
-                  disabled={isBusy || t.status === 'investigating'}
-                  className="px-3.5 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-slate-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition"
-                >
-                  {t.status === 'investigating' ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Diagnosing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Investigate in Sandbox</span>
-                    </>
-                  )}
-                </button>
+                </div>
               </div>
+
+              {/* Bottom Technical Telemetry / Root-Cause Details */}
+              {t.rootCauseSummary ? (
+                <div className="rounded-md border border-[#242830] bg-[#0D0F12] p-3.5 space-y-2 text-xs">
+                  <div>
+                    <span className="font-medium text-[#F4F4F5]">Root Cause: </span>
+                    <span className="text-[#9CA3AF]">{t.rootCauseSummary}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-[#34D399]">Resolution Plan: </span>
+                    <span className="text-[#9CA3AF]">{t.proposedResolution}</span>
+                  </div>
+                </div>
+              ) : (
+                <details className="text-[11px] font-mono text-[#6B7280] group">
+                  <summary className="cursor-pointer hover:text-[#9CA3AF] flex items-center gap-1">
+                    <ChevronDown className="w-3 h-3 group-open:rotate-180 transition-transform" />
+                    <span>Inspect Untrusted Customer Telemetry Payload (Isolated on Execution)</span>
+                  </summary>
+                  <pre className="mt-2 p-3 rounded bg-[#0D0F12] border border-[#242830] text-[#9CA3AF] overflow-x-auto text-[10px] leading-relaxed">
+                    {JSON.stringify(t.diagnosticPayload, null, 2)}
+                  </pre>
+                </details>
+              )}
             </div>
-
-            {t.rootCauseSummary ? (
-              <div className="rounded-lg border border-slate-800 bg-[#060911] p-3 space-y-1.5 text-xs">
-                <div className="text-sky-300 font-mono text-[11px]">
-                  Verified Root Cause: <span className="text-slate-200">{t.rootCauseSummary}</span>
-                </div>
-                <div className="text-emerald-300 font-mono text-[11px]">
-                  Action Plan: <span className="text-slate-300">{t.proposedResolution}</span>
-                </div>
-              </div>
-            ) : (
-              <details className="text-[11px] font-mono text-slate-500">
-                <summary className="cursor-pointer hover:text-slate-300">
-                  Inspect Untrusted Customer Telemetry Payload (Isolated on Execution)
-                </summary>
-                <pre className="mt-1.5 p-2.5 rounded bg-slate-950 border border-slate-800 text-slate-400 overflow-x-auto">
-                  {JSON.stringify(t.diagnosticPayload, null, 2)}
-                </pre>
-              </details>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

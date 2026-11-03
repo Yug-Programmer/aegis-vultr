@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
-  Briefcase,
   Globe,
   Plus,
   Play,
   Loader2,
   ExternalLink,
   Mail,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 import type { SalesLead } from '@aegis/shared';
 
@@ -62,193 +63,265 @@ export function SalesOpsView({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-5 max-w-7xl mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#242830]">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-sky-400" />
-            Sales Operations &amp; Autonomous Prospect Qualification
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Researches live company domains in an isolated Chromium sandbox, scores ICP fit via
-            Python, updates CRM stages, and queues executive outreach for approval.
+          <h1 className="text-2xl font-semibold text-[#F4F4F5] tracking-tight">
+            Sales Operations
+          </h1>
+          <p className="text-xs text-[#9CA3AF] mt-1">
+            Autonomous prospect research, qualification, CRM updates, and outreach preparation.
           </p>
         </div>
+
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-3.5 py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
+          className="px-3.5 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#0B0D10] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition shadow-sm self-start sm:self-auto"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add Prospect Account</span>
+          {showAdd ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          <span>{showAdd ? 'Cancel' : 'Add Prospect Account'}</span>
         </button>
       </div>
 
+      {/* Add Lead Form */}
       {showAdd && (
         <form
           onSubmit={handleCreate}
-          className="rounded-xl border border-sky-500/35 bg-[#0b1222] p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs"
+          className="rounded-lg border border-[#242830] bg-[#111419] p-5 space-y-4"
         >
-          <input
-            required
-            placeholder="Company Name (e.g. GitHub Enterprise)"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <input
-            required
-            placeholder="Live Website URL (https://...)"
-            value={domainUrl}
-            onChange={(e) => setDomainUrl(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-sky-300"
-          />
-          <input
-            placeholder="Industry"
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <input
-            placeholder="Decision Maker Name"
-            value={contactName}
-            onChange={(e) => setContactName(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <input
-            placeholder="Title / Role"
-            value={contactRole}
-            onChange={(e) => setContactRole(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              placeholder="Est. ARR ($)"
-              value={estimatedArrUsd}
-              onChange={(e) => setEstimatedArrUsd(Number(e.target.value))}
-              className="w-full rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-slate-100"
-            />
+          <div className="text-xs font-semibold text-[#F4F4F5]">
+            New Prospect Account Details
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Company Name</label>
+              <input
+                required
+                placeholder="e.g. GitHub Enterprise"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Live Website URL</label>
+              <input
+                required
+                placeholder="https://..."
+                value={domainUrl}
+                onChange={(e) => setDomainUrl(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#38BDF8] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Industry</label>
+              <input
+                placeholder="Cloud & SaaS"
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Contact Name</label>
+              <input
+                placeholder="e.g. Elena Rostova"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Role / Job Title</label>
+              <input
+                placeholder="e.g. VP of Engineering"
+                value={contactRole}
+                onChange={(e) => setContactRole(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Contact Email</label>
+              <input
+                placeholder="elena@company.com"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Estimated ARR ($)</label>
+              <input
+                type="number"
+                placeholder="85000"
+                value={estimatedArrUsd}
+                onChange={(e) => setEstimatedArrUsd(Number(e.target.value))}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#F4F4F5] outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold shrink-0 cursor-pointer"
+              className="px-4 py-2 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#0B0D10] font-semibold text-xs cursor-pointer transition"
             >
-              Save Lead
+              Save Prospect Account
             </button>
           </div>
         </form>
       )}
 
-      {/* Leads Cards / Pipeline */}
-      <div className="space-y-3">
-        {leads.map((lead) => (
-          <div
-            key={lead.id}
-            className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 space-y-3"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="text-sm font-bold text-white">{lead.company}</span>
-                  <a
-                    href={lead.domainUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] font-mono text-sky-400 hover:underline flex items-center gap-1"
-                  >
-                    <Globe className="w-3 h-3" />
-                    {lead.domainUrl}
-                  </a>
-                  <span
-                    className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
-                      lead.stage === 'contacted'
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
-                        : lead.stage === 'outreach_queued'
-                          ? 'bg-amber-500/15 text-amber-300 border-amber-500/35'
-                          : lead.stage === 'researching'
-                            ? 'bg-sky-500/15 text-sky-300 border-sky-500/35'
-                            : 'bg-slate-800 text-slate-300 border-slate-700'
-                    }`}
-                  >
-                    {lead.stage.replace('_', ' ')}
-                  </span>
-                  {lead.icpScore !== undefined && (
-                    <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                      ICP Fit: {lead.icpScore}/100
+      {/* Prospect Accounts List */}
+      <div className="space-y-4">
+        {leads.map((lead) => {
+          const isResearching = lead.stage === 'researching';
+          return (
+            <div
+              key={lead.id}
+              className="rounded-lg border border-[#242830] bg-[#111419] p-5 space-y-4"
+            >
+              {/* Account Card Top Section */}
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div className="space-y-1.5 min-w-0">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-base font-semibold text-[#F4F4F5]">
+                      {lead.company}
                     </span>
-                  )}
-                </div>
-                <div className="text-xs text-slate-400">
-                  {lead.contactName} ({lead.contactRole}) •{' '}
-                  <span className="font-mono text-slate-300">{lead.contactEmail}</span> • Est. ARR{' '}
-                  <span className="font-mono text-emerald-400 font-semibold">
-                    ${lead.estimatedArrUsd.toLocaleString()}
-                  </span>
-                </div>
-              </div>
+                    <a
+                      href={lead.domainUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-mono text-[#38BDF8] hover:underline flex items-center gap-1"
+                    >
+                      <Globe className="w-3 h-3 text-[#6B7280]" />
+                      <span>{lead.domainUrl}</span>
+                    </a>
 
-              <div className="flex items-center gap-2">
-                {lead.lastMissionId && (
-                  <button
-                    onClick={() => onInspectMission(lead.lastMissionId!)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Sandbox Proof</span>
-                  </button>
-                )}
-                <button
-                  onClick={() => void onQualifyLead(lead.id)}
-                  disabled={isBusy || lead.stage === 'researching'}
-                  className="px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-slate-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition"
-                >
-                  {lead.stage === 'researching' ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Researching Site...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>
-                        {lead.icpScore !== undefined ? 'Re-Run Research' : 'Qualify & Research in Sandbox'}
+                    {/* Subtle Status Pill */}
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-[#15181E] border border-[#242830] text-[#9CA3AF]">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          lead.stage === 'contacted'
+                            ? 'bg-[#34D399]'
+                            : lead.stage === 'outreach_queued'
+                              ? 'bg-[#FBBF24]'
+                              : lead.stage === 'researching'
+                                ? 'bg-[#38BDF8]'
+                                : 'bg-[#6B7280]'
+                        }`}
+                      />
+                      <span className="capitalize">{lead.stage.replace('_', ' ')}</span>
+                    </span>
+
+                    {/* ICP Fit score if present */}
+                    {lead.icpScore !== undefined && (
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/20">
+                        ICP Fit: {lead.icpScore}/100
                       </span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+                    )}
+                  </div>
 
-            {lead.detectedSignals.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {lead.detectedSignals.map((sig, idx) => (
-                  <span
-                    key={idx}
-                    className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300"
-                  >
-                    {sig}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {lead.draftOutreachBody && (
-              <div className="rounded-lg border border-slate-800/90 bg-[#060911] p-3 space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-mono text-sky-300">
-                  <span className="flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5" />
-                    Drafted Outreach: {lead.draftOutreachSubject}
-                  </span>
-                  <span className="text-slate-500">
-                    {lead.stage === 'contacted' ? 'Approved & Dispatched ✓' : 'Awaiting Approval'}
-                  </span>
+                  {/* Clean Contact Metadata Row */}
+                  <div className="text-xs text-[#9CA3AF] flex items-center gap-2 flex-wrap">
+                    <span className="text-[#F4F4F5] font-medium">{lead.contactName}</span>
+                    <span className="text-[#6B7280]">·</span>
+                    <span>{lead.contactRole}</span>
+                    <span className="text-[#6B7280]">·</span>
+                    <span className="font-mono text-[#9CA3AF]">{lead.contactEmail}</span>
+                    <span className="text-[#6B7280]">·</span>
+                    <span>Est. ARR:</span>
+                    <span className="font-mono text-[#34D399] font-medium">
+                      ${lead.estimatedArrUsd.toLocaleString()}
+                    </span>
+                    <span className="text-[#6B7280]">·</span>
+                    <span className="text-[#6B7280]">{lead.industry}</span>
+                  </div>
                 </div>
-                <pre className="text-xs text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
-                  {lead.draftOutreachBody}
-                </pre>
+
+                {/* Account Actions */}
+                <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+                  {lead.lastMissionId && (
+                    <button
+                      onClick={() => onInspectMission(lead.lastMissionId!)}
+                      className="px-3 py-1.5 rounded-md bg-[#15181E] hover:bg-[#242830] border border-[#242830] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs font-mono flex items-center gap-1.5 cursor-pointer transition"
+                      title="Inspect Ed25519 Sandbox Execution Proof"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-[#38BDF8]" />
+                      <span>Sandbox Proof</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => void onQualifyLead(lead.id)}
+                    disabled={isBusy || isResearching}
+                    className="px-3.5 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition shadow-sm"
+                  >
+                    {isResearching ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Researching Site...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>
+                          {lead.icpScore !== undefined ? 'Re-Run Research' : 'Qualify in Sandbox'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Detected Signals Tag Row */}
+              {lead.detectedSignals.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {lead.detectedSignals.map((sig, idx) => (
+                    <span
+                      key={idx}
+                      className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#15181E] border border-[#242830] text-[#9CA3AF]"
+                    >
+                      {sig}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Redesigned Outreach Preview (Professional Email Style) */}
+              {lead.draftOutreachBody && (
+                <div className="rounded-lg border border-[#242830] bg-[#0D0F12] p-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#242830] text-xs">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
+                      <span className="font-medium text-[#F4F4F5]">Subject:</span>
+                      <span className="text-[#9CA3AF] truncate max-w-lg">
+                        {lead.draftOutreachSubject}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono shrink-0">
+                      {lead.stage === 'contacted' ? (
+                        <span className="text-[#34D399] flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Dispatched ✓</span>
+                        </span>
+                      ) : (
+                        <span className="text-[#FBBF24]">Awaiting Human Approval</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Email Body */}
+                  <div className="text-xs text-[#9CA3AF] whitespace-pre-wrap leading-relaxed font-sans">
+                    {lead.draftOutreachBody}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

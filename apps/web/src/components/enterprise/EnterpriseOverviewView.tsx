@@ -1,13 +1,10 @@
+import { useState } from 'react';
 import {
-  Briefcase,
-  Receipt,
-  LifeBuoy,
-  UserCheck,
-  TerminalSquare,
   RotateCcw,
   ArrowRight,
   ShieldCheck,
-  Sparkles,
+  MoreHorizontal,
+  ChevronDown,
 } from 'lucide-react';
 import type { EnterpriseOverviewPayload } from '@aegis/shared';
 
@@ -39,242 +36,303 @@ export function EnterpriseOverviewView({
   isBusy,
 }: EnterpriseOverviewViewProps) {
   const s = overview?.stats;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [containmentExpanded, setContainmentExpanded] = useState(false);
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6 max-w-7xl mx-auto w-full">
-      {/* Hero Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-[#0b1325] via-[#09101f] to-[#081518] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30">
-            <Sparkles className="w-3 h-3" />
-            Vultr Enterprise Operations Control Plane + Contained Sandbox Execution
-          </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">
-            Future-of-Work Autonomous Operations Hub
+    <div className="flex-1 overflow-y-auto p-8 space-y-8 max-w-7xl mx-auto w-full">
+      {/* Page Header (Minimal, Typography-Driven, Linear/Vercel style) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1E232B]">
+        <div>
+          <h1 className="text-xl font-semibold text-[#F4F4F5] tracking-tight">
+            Executive Overview
           </h1>
-          <p className="text-xs text-slate-400 max-w-3xl leading-relaxed">
-            Every business workflow—live web prospect qualification, 3-way AP invoice reconciliation,
-            and untrusted support log diagnostics—executes inside an isolated sandbox on Vultr,
-            returns Ed25519-signed outputs, and routes high-impact actions through Human-in-the-Loop
-            approvals.
+          <p className="text-xs text-[#9CA3AF] mt-0.5">
+            Monitor business operations, autonomous workflows, and security activity.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
-          <button
-            onClick={() => void onResetDemo()}
-            disabled={isBusy}
-            className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition disabled:opacity-50"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Demo Data</span>
-          </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {/* Subtle Demo Actions Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#F4F4F5] hover:bg-[#15181E] text-xs font-medium transition cursor-pointer flex items-center"
+              title="Demo & Environment Options"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 mt-1 w-44 rounded-md bg-[#15181E] border border-[#242830] shadow-xl py-1 z-30">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void onResetDemo();
+                  }}
+                  disabled={isBusy}
+                  className="w-full px-3 py-1.5 text-left text-xs text-[#9CA3AF] hover:text-[#F4F4F5] hover:bg-[#111419] flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Demo Data</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => onNavigate('studio')}
-            className="px-3.5 py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
+            className="px-3.5 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#0B0D10] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition shadow-sm"
           >
-            <TerminalSquare className="w-3.5 h-3.5" />
-            <span>Open Sandbox Studio</span>
+            <span>Open Studio</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* 4 Executive KPI Cards */}
+      {/* KPI Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Sales Pipeline ARR */}
         <div
           onClick={() => onNavigate('sales')}
-          className="rounded-xl border border-slate-800/90 bg-[#090e1a] hover:border-sky-500/40 p-4 cursor-pointer transition space-y-2"
+          className="rounded-lg border border-[#1E232B] bg-[#111419]/50 hover:bg-[#111419] hover:border-[#38BDF8]/40 p-5 cursor-pointer transition flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Sales Pipeline ARR</span>
-            <Briefcase className="w-4 h-4 text-sky-400" />
+          <div className="text-[11px] font-medium uppercase tracking-wider text-[#9CA3AF]">
+            Sales Pipeline ARR
           </div>
-          <div className="text-2xl font-bold font-mono text-white">
+          <div className="my-2 text-2xl font-semibold tracking-tight text-[#F4F4F5]">
             ${(s?.pipelineArrUsd ?? 0).toLocaleString()}
           </div>
-          <div className="text-[11px] font-mono text-emerald-400">
-            {s?.qualifiedLeadsCount ?? 0} / {s?.totalLeadsCount ?? 0} leads researched &amp; qualified
+          <div className="text-xs text-[#9CA3AF] flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
+            <span>{s?.qualifiedLeadsCount ?? 0} of {s?.totalLeadsCount ?? 0} qualified</span>
           </div>
         </div>
 
+        {/* Prevented AP Leakage */}
         <div
           onClick={() => onNavigate('finance')}
-          className="rounded-xl border border-slate-800/90 bg-[#090e1a] hover:border-emerald-500/40 p-4 cursor-pointer transition space-y-2"
+          className="rounded-lg border border-[#1E232B] bg-[#111419]/50 hover:bg-[#111419] hover:border-[#34D399]/40 p-5 cursor-pointer transition flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Prevented AP Leakage</span>
-            <Receipt className="w-4 h-4 text-emerald-400" />
+          <div className="text-[11px] font-medium uppercase tracking-wider text-[#9CA3AF]">
+            Prevented AP Leakage
           </div>
-          <div className="text-2xl font-bold font-mono text-emerald-300">
+          <div className="my-2 text-2xl font-semibold tracking-tight text-[#34D399]">
             ${(s?.preventedLeakageUsd ?? 0).toLocaleString()}
           </div>
-          <div className="text-[11px] font-mono text-slate-400">
-            {s?.reconciledInvoicesCount ?? 0} reconciled •{' '}
-            <span className="text-rose-400">{s?.flaggedAnomaliesCount ?? 0} anomalies flagged</span>
+          <div className="text-xs text-[#9CA3AF] flex items-center gap-1.5">
+            <span>{s?.reconciledInvoicesCount ?? 0} reconciled</span>
+            <span className="text-[#6B7280]">·</span>
+            <span className={s?.flaggedAnomaliesCount ? 'text-[#F87171]' : 'text-[#9CA3AF]'}>
+              {s?.flaggedAnomaliesCount ?? 0} anomalies
+            </span>
           </div>
         </div>
 
+        {/* Support & Incident Queue */}
         <div
           onClick={() => onNavigate('support')}
-          className="rounded-xl border border-slate-800/90 bg-[#090e1a] hover:border-purple-500/40 p-4 cursor-pointer transition space-y-2"
+          className="rounded-lg border border-[#1E232B] bg-[#111419]/50 hover:bg-[#111419] hover:border-[#38BDF8]/40 p-5 cursor-pointer transition flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Support &amp; Incident Queue</span>
-            <LifeBuoy className="w-4 h-4 text-purple-400" />
+          <div className="text-[11px] font-medium uppercase tracking-wider text-[#9CA3AF]">
+            Support Queue
           </div>
-          <div className="text-2xl font-bold font-mono text-white">
-            {s?.openTicketsCount ?? 0} Open
+          <div className="my-2 text-2xl font-semibold tracking-tight text-[#F4F4F5]">
+            {s?.openTicketsCount ?? 0}
+            <span className="text-xs font-normal text-[#9CA3AF] ml-1.5">Open</span>
           </div>
-          <div className="text-[11px] font-mono text-slate-400">
-            <span className="text-emerald-400">{s?.autoResolvedTicketsCount ?? 0} auto-fixed</span> •{' '}
-            <span className="text-amber-400">{s?.escalatedTicketsCount ?? 0} escalated</span>
+          <div className="text-xs text-[#9CA3AF] flex items-center gap-1.5">
+            <span>{s?.autoResolvedTicketsCount ?? 0} resolved</span>
+            <span className="text-[#6B7280]">·</span>
+            <span className={s?.escalatedTicketsCount ? 'text-[#FBBF24]' : 'text-[#9CA3AF]'}>
+              {s?.escalatedTicketsCount ?? 0} escalated
+            </span>
           </div>
         </div>
 
+        {/* Human Approval Inbox */}
         <div
           onClick={() => onNavigate('approvals')}
-          className="rounded-xl border border-slate-800/90 bg-[#090e1a] hover:border-amber-500/40 p-4 cursor-pointer transition space-y-2"
+          className="rounded-lg border border-[#1E232B] bg-[#111419]/50 hover:bg-[#111419] hover:border-[#FBBF24]/40 p-5 cursor-pointer transition flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Human Approval Inbox</span>
-            <UserCheck className="w-4 h-4 text-amber-400" />
+          <div className="text-[11px] font-medium uppercase tracking-wider text-[#9CA3AF]">
+            Approval Inbox
           </div>
-          <div className="text-2xl font-bold font-mono text-amber-300">
-            {s?.pendingApprovalsCount ?? 0} Pending
+          <div className="my-2 text-2xl font-semibold tracking-tight text-[#FBBF24]">
+            {s?.pendingApprovalsCount ?? 0}
+            <span className="text-xs font-normal text-[#9CA3AF] ml-1.5">Pending</span>
           </div>
-          <div className="text-[11px] font-mono text-slate-400">
-            Every recommendation backed by Ed25519 receipts
-          </div>
-        </div>
-      </div>
-
-      {/* 3 Enterprise Department Workflow Pillars */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Sales Ops Card */}
-        <div className="rounded-2xl border border-slate-800 bg-[#090e1a] p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                Sales Operations
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Chromium + Python ICP</span>
-            </div>
-            <h3 className="text-base font-semibold text-white">
-              Live Prospect Research, CRM Qualification &amp; Outreach
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Visits prospect domains inside the SSRF-guarded Headless Chromium sandbox, extracts
-              live product &amp; security signals, computes a deterministic ICP fit score in Python,
-              updates CRM stage, and queues personalized executive outreach for approval.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 pt-2">
-            <button
-              onClick={() => void onQuickQualifyTopLead()}
-              disabled={isBusy}
-              className="flex-1 py-2 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-slate-950 font-semibold text-xs cursor-pointer transition"
-            >
-              Qualify Next Lead Live
-            </button>
-            <button
-              onClick={() => onNavigate('sales')}
-              className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs flex items-center gap-1 cursor-pointer"
-            >
-              <span>CRM</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Finance & Accounting Card */}
-        <div className="rounded-2xl border border-slate-800 bg-[#090e1a] p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                Finance &amp; Accounting
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Python 3-Way Match</span>
-            </div>
-            <h3 className="text-base font-semibold text-white">
-              AP Invoice Reconciliation, Fraud &amp; Overbilling Audit
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Dispatches invoices &amp; purchase orders into an isolated Python workspace to verify
-              3-way PO tolerances, catch duplicate submissions &amp; vendor IBAN tampering, generate
-              a CFO SVG/HTML audit pack, and stage payment holds.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 pt-2">
-            <button
-              onClick={() => void onQuickReconcileFinance()}
-              disabled={isBusy}
-              className="flex-1 py-2 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold text-xs cursor-pointer transition"
-            >
-              Run AP Ledger Audit
-            </button>
-            <button
-              onClick={() => onNavigate('finance')}
-              className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs flex items-center gap-1 cursor-pointer"
-            >
-              <span>Ledger</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Customer Support Card */}
-        <div className="rounded-2xl border border-slate-800 bg-[#090e1a] p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30">
-                Customer Support
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Sandboxed Triage</span>
-            </div>
-            <h3 className="text-base font-semibold text-white">
-              Cross-System Ticket Reproduction &amp; Human Escalation
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Isolates untrusted customer webhook payloads, billing logs, and SAML assertions inside
-              the sandbox to reproduce root causes in Python—auto-resolving tier-2 issues and
-              escalating credits or security policy changes to human sign-off.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 pt-2">
-            <button
-              onClick={() => void onQuickTriageTopTicket()}
-              disabled={isBusy}
-              className="flex-1 py-2 px-3 rounded-lg bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-slate-950 font-semibold text-xs cursor-pointer transition"
-            >
-              Triage Next P1 Ticket
-            </button>
-            <button
-              onClick={() => onNavigate('support')}
-              className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs flex items-center gap-1 cursor-pointer"
-            >
-              <span>Queue</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+          <div className="text-xs text-[#9CA3AF]">
+            Cryptographically signed
           </div>
         </div>
       </div>
 
-      {/* Platform Architecture Strip */}
-      <div className="rounded-xl border border-slate-800/80 bg-[#080c17] p-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>
-            <strong className="text-slate-200">Why Containment-First Matters for Enterprise Ops:</strong>{' '}
-            Scraping external prospect websites and parsing untrusted vendor/customer payloads are top
-            prompt-injection &amp; SSRF vectors. AEGIS isolates every execution step on Vultr.
-          </span>
+      {/* Operational Workflows Section */}
+      <div className="space-y-3">
+        <div className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
+          Autonomous Operations
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Sales Operations Card */}
+          <div className="rounded-lg border border-[#1E232B] bg-[#111419]/50 p-5 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[11px] font-mono text-[#38BDF8] uppercase tracking-wider">
+                  Sales Ops
+                </span>
+                <span className="text-[11px] font-mono text-[#6B7280]">
+                  Chromium + Python
+                </span>
+              </div>
+              <h3 className="text-sm font-semibold text-[#F4F4F5]">
+                Prospect Research &amp; Qualification
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Visits prospect domains inside an isolated Chromium sandbox, evaluates product signals,
+                computes deterministic ICP fit scores, and prepares personalized outreach for approval.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-[#1E232B]">
+              <button
+                onClick={() => void onQuickQualifyTopLead()}
+                disabled={isBusy}
+                className="flex-1 py-1.5 px-3 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs cursor-pointer transition text-center"
+              >
+                Qualify Next Lead
+              </button>
+              <button
+                onClick={() => onNavigate('sales')}
+                className="py-1.5 px-2.5 rounded-md hover:bg-[#15181E] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs flex items-center gap-1 cursor-pointer transition"
+              >
+                <span>View</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Finance & Accounting Card */}
+          <div className="rounded-lg border border-[#1E232B] bg-[#111419]/50 p-5 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[11px] font-mono text-[#34D399] uppercase tracking-wider">
+                  Finance &amp; AP
+                </span>
+                <span className="text-[11px] font-mono text-[#6B7280]">
+                  3-Way Match
+                </span>
+              </div>
+              <h3 className="text-sm font-semibold text-[#F4F4F5]">
+                AP Invoice Reconciliation &amp; Fraud Audit
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Matches invoices and POs in an isolated Python workspace to identify duplicate submissions,
+                unauthorized overbilling, and vendor IBAN tampering before disbursement.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-[#1E232B]">
+              <button
+                onClick={() => void onQuickReconcileFinance()}
+                disabled={isBusy}
+                className="flex-1 py-1.5 px-3 rounded-md bg-[#34D399] hover:bg-[#6EE7B7] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs cursor-pointer transition text-center"
+              >
+                Run AP Audit
+              </button>
+              <button
+                onClick={() => onNavigate('finance')}
+                className="py-1.5 px-2.5 rounded-md hover:bg-[#15181E] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs flex items-center gap-1 cursor-pointer transition"
+              >
+                <span>Ledger</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Customer Support Card */}
+          <div className="rounded-lg border border-[#1E232B] bg-[#111419]/50 p-5 flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[11px] font-mono text-[#38BDF8] uppercase tracking-wider">
+                  Support
+                </span>
+                <span className="text-[11px] font-mono text-[#6B7280]">
+                  Sandboxed Triage
+                </span>
+              </div>
+              <h3 className="text-sm font-semibold text-[#F4F4F5]">
+                Ticket Reproduction &amp; Diagnostics
+              </h3>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Isolates untrusted customer webhook payloads, billing logs, and SAML assertions inside
+                the sandbox to reproduce errors safely, resolving tickets and routing policy escalations.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-[#1E232B]">
+              <button
+                onClick={() => void onQuickTriageTopTicket()}
+                disabled={isBusy}
+                className="flex-1 py-1.5 px-3 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs cursor-pointer transition text-center"
+              >
+                Triage Next Ticket
+              </button>
+              <button
+                onClick={() => onNavigate('support')}
+                className="py-1.5 px-2.5 rounded-md hover:bg-[#15181E] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs flex items-center gap-1 cursor-pointer transition"
+              >
+                <span>Queue</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Containment Architecture Information */}
+      <div className="rounded-lg border border-[#1E232B] bg-[#111419]/30 overflow-hidden">
         <button
-          onClick={() => onNavigate('studio')}
-          className="text-sky-400 hover:text-sky-300 font-mono text-[11px] cursor-pointer"
+          onClick={() => setContainmentExpanded(!containmentExpanded)}
+          className="w-full p-3.5 flex items-center justify-between text-xs text-[#9CA3AF] hover:text-[#F4F4F5] cursor-pointer transition text-left"
         >
-          Inspect Raw Sandbox Studio &amp; Receipts →
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-[#34D399] shrink-0" />
+            <span className="font-medium text-[#F4F4F5]">
+              Containment-First Architecture
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-[#6B7280] hidden sm:inline">
+              SSRF isolation &amp; Ed25519 cryptographic receipts
+            </span>
+            <ChevronDown
+              className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                containmentExpanded ? 'rotate-180' : ''
+              }`}
+            />
+          </div>
         </button>
+
+        {containmentExpanded && (
+          <div className="px-3.5 pb-3.5 pt-1 text-xs text-[#9CA3AF] border-t border-[#1E232B] space-y-2 leading-relaxed">
+            <p>
+              Scraping external prospect websites and parsing untrusted vendor invoices or customer payloads are top
+              prompt-injection and SSRF vectors. AEGIS isolates every execution step on Vultr Cloud Compute with gVisor sandbox
+              containment, blocking private network egress (169.254.169.254 metadata and RFC1918) and signing every artifact with Ed25519 keys.
+            </p>
+            <div className="flex justify-end pt-1">
+              <button
+                onClick={() => onNavigate('studio')}
+                className="text-[#38BDF8] hover:underline text-[11px] font-mono cursor-pointer flex items-center gap-1"
+              >
+                <span>Inspect Sandbox Studio &amp; Receipts</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

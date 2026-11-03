@@ -37,40 +37,42 @@ export function ContainmentAuditModal({ open, onClose }: ContainmentAuditModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-slate-700/90 bg-[#080d19] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
-        <div className="px-5 py-3.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 bg-[#0B0D10]/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl rounded-lg border border-[#242830] bg-[#111419] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+        {/* Modal Header */}
+        <div className="px-5 py-3.5 bg-[#0D0F12] border-b border-[#242830] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <ShieldAlert className="w-5 h-5 text-emerald-400" />
+            <ShieldAlert className="w-4 h-4 text-[#34D399]" />
             <div>
-              <h3 className="text-sm font-bold text-white">
-                Live Red-Team Sandbox Containment Self-Test
+              <h3 className="text-sm font-semibold text-[#F4F4F5]">
+                Red-Team Sandbox Containment Self-Test
               </h3>
-              <p className="text-[11px] text-slate-400">
-                Dispatches 4 real adversarial escape probes into a fresh sandbox and verifies defense layers
+              <p className="text-[11px] text-[#9CA3AF]">
+                Dispatches 4 real escape vectors into a fresh Vultr sandbox to verify defense layers
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+            className="p-1 rounded hover:bg-[#15181E] text-[#9CA3AF] hover:text-[#F4F4F5] cursor-pointer transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
+        {/* Modal Body */}
         <div className="p-5 overflow-y-auto space-y-4">
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-900/70 border border-slate-800 p-3.5">
-            <div className="text-xs text-slate-300 leading-relaxed">
-              Tests <strong className="text-white">API Key Exfiltration</strong>,{' '}
-              <strong className="text-white">Vultr Metadata SSRF (169.254.169.254)</strong>,{' '}
-              <strong className="text-white">Host Path Traversal</strong>, and{' '}
-              <strong className="text-white">Runaway CPU Process Watchdog</strong>.
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md bg-[#0D0F12] border border-[#242830] p-3.5">
+            <div className="text-xs text-[#9CA3AF] leading-relaxed">
+              Verifies <strong className="text-[#F4F4F5]">Host Key Leakage</strong>,{' '}
+              <strong className="text-[#F4F4F5]">169.254.169.254 SSRF</strong>,{' '}
+              <strong className="text-[#F4F4F5]">Filesystem Traversal</strong>, and{' '}
+              <strong className="text-[#F4F4F5]">CPU Watchdog Guards</strong>.
             </div>
             <button
               onClick={handleRun}
               disabled={running}
-              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold text-xs flex items-center gap-2 shrink-0 cursor-pointer transition"
+              className="px-4 py-2 rounded-md bg-[#34D399] hover:bg-[#6EE7B7] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs flex items-center gap-2 shrink-0 cursor-pointer transition shadow-sm"
             >
               {running ? (
                 <>
@@ -87,7 +89,7 @@ export function ContainmentAuditModal({ open, onClose }: ContainmentAuditModalPr
           </div>
 
           {error && (
-            <div className="rounded-lg bg-rose-950/40 border border-rose-500/40 p-3 text-xs text-rose-200 font-mono">
+            <div className="rounded-md bg-[#F87171]/10 border border-[#F87171]/30 p-3 text-xs text-[#F87171] font-mono">
               {error}
             </div>
           )}
@@ -95,55 +97,55 @@ export function ContainmentAuditModal({ open, onClose }: ContainmentAuditModalPr
           {report && (
             <div className="space-y-3">
               <div
-                className={`rounded-xl p-3.5 border flex items-center justify-between ${
+                className={`rounded-md p-3 border flex items-center justify-between ${
                   report.allContained
-                    ? 'bg-emerald-950/35 border-emerald-500/45 text-emerald-200'
-                    : 'bg-rose-950/35 border-rose-500/45 text-rose-200'
+                    ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]'
+                    : 'bg-[#F87171]/10 border-[#F87171]/30 text-[#F87171]'
                 }`}
               >
                 <div className="flex items-center gap-2 text-xs font-semibold">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4 text-[#34D399]" />
                   <span>
                     {report.allContained
                       ? 'ALL 4 ADVERSARIAL ESCAPE VECTORS CONTAINED'
                       : 'WARNING: CONTAINMENT REGRESSION DETECTED'}
                   </span>
                 </div>
-                <span className="text-[11px] font-mono text-slate-300">
+                <span className="text-[11px] font-mono text-[#9CA3AF]">
                   {report.isolationTier} | Ed25519 Chain: {report.chainVerified ? 'VALID' : 'FAIL'}
                 </span>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {report.probes.map((probe) => (
                   <div
                     key={probe.id}
-                    className="rounded-xl border border-slate-800 bg-[#0b1120] p-3.5 space-y-1.5"
+                    className="rounded-md border border-[#242830] bg-[#0D0F12] p-3 space-y-1.5"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         {probe.contained ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-[#34D399] shrink-0" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                          <XCircle className="w-4 h-4 text-[#F87171] shrink-0" />
                         )}
-                        <span className="text-xs font-semibold text-white">{probe.name}</span>
+                        <span className="text-xs font-semibold text-[#F4F4F5]">{probe.name}</span>
                       </div>
                       <span
                         className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                           probe.contained
-                            ? 'bg-emerald-500/15 text-emerald-300'
-                            : 'bg-rose-500/15 text-rose-300'
+                            ? 'bg-[#34D399]/15 text-[#34D399]'
+                            : 'bg-[#F87171]/15 text-[#F87171]'
                         }`}
                       >
-                        {probe.contained ? 'CONTAINED' : 'EXPOSED'} • {probe.durationMs}ms
+                        {probe.contained ? 'CONTAINED' : 'EXPOSED'} · {probe.durationMs}ms
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400">{probe.attackDescription}</p>
-                    <div className="text-[11px] font-mono text-sky-300">
+                    <p className="text-[11px] text-[#9CA3AF]">{probe.attackDescription}</p>
+                    <div className="text-[11px] font-mono text-[#38BDF8]">
                       Defense: {probe.enforcedBy}
                     </div>
-                    <div className="rounded bg-slate-950/90 border border-slate-800/80 px-2.5 py-1.5 text-[11px] font-mono text-slate-300 break-words">
+                    <div className="rounded bg-[#0B0D10] border border-[#242830] px-2.5 py-1.5 text-[11px] font-mono text-[#9CA3AF] break-words">
                       {probe.evidence}
                     </div>
                   </div>

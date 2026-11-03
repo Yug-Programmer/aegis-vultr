@@ -1,5 +1,4 @@
 import {
-  UserCheck,
   CheckCircle2,
   XCircle,
   Fingerprint,
@@ -23,130 +22,146 @@ export function ApprovalsView({
   const history = approvals.filter((a) => a.status !== 'pending');
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6 max-w-6xl mx-auto w-full">
-      <div>
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <UserCheck className="w-5 h-5 text-amber-400" />
-          Human-in-the-Loop Escalation &amp; Approval Inbox
-        </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Agents prepare verifiable findings inside the Vultr sandbox, but outbound customer/vendor
-          communications, treasury holds, and SLA credits wait for explicit human sign-off.
+    <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-6xl mx-auto w-full">
+      {/* Header */}
+      <div className="pb-2 border-b border-[#242830]">
+        <h1 className="text-2xl font-semibold text-[#F4F4F5] tracking-tight">
+          Approvals
+        </h1>
+        <p className="text-xs text-[#9CA3AF] mt-1">
+          Review and authorize sensitive autonomous operations.
         </p>
       </div>
 
+      {/* Pending Queue */}
       {pending.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-800 bg-[#090e1a]/60 p-8 text-center space-y-2">
-          <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-          <div className="text-sm font-semibold text-white">Approval Queue Clear</div>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Run a Sales Lead Qualification, AP Ledger Reconciliation, or P1 Support Investigation
-            to see escalated recommendations attested by Ed25519 sandbox receipts.
+        <div className="rounded-lg border border-[#242830] bg-[#111419] p-8 text-center space-y-2">
+          <CheckCircle2 className="w-6 h-6 text-[#34D399] mx-auto" />
+          <div className="text-sm font-medium text-[#F4F4F5]">All Clear</div>
+          <p className="text-xs text-[#9CA3AF] max-w-sm mx-auto leading-relaxed">
+            No pending approvals. Recommendations requiring human authorization will appear here.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {pending.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-xl border border-amber-500/35 bg-[#0b1120] p-4 space-y-3"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">
-                      {item.department}
-                    </span>
-                    <span
-                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold flex items-center gap-1 ${
-                        item.riskLevel === 'critical' || item.riskLevel === 'high'
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/35'
-                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/35'
-                      }`}
-                    >
-                      <ShieldAlert className="w-3 h-3" />
-                      {item.riskLevel} risk
-                    </span>
-                    <span className="text-sm font-bold text-white">{item.title}</span>
+        <div className="space-y-4">
+          {pending.map((item) => {
+            const isHighRisk = item.riskLevel === 'critical' || item.riskLevel === 'high';
+            return (
+              <div
+                key={item.id}
+                className="rounded-lg border border-[#242830] bg-[#111419] p-5 space-y-4"
+              >
+                {/* Header row */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-[#15181E] text-[#9CA3AF] border border-[#242830]">
+                        {item.department}
+                      </span>
+                      <span
+                        className={`text-[11px] font-mono uppercase px-2 py-0.5 rounded font-medium flex items-center gap-1 ${
+                          isHighRisk
+                            ? 'bg-[#F87171]/15 text-[#F87171] border border-[#F87171]/25'
+                            : 'bg-[#FBBF24]/15 text-[#FBBF24] border border-[#FBBF24]/25'
+                        }`}
+                      >
+                        <ShieldAlert className="w-3 h-3" />
+                        <span>{item.riskLevel} risk</span>
+                      </span>
+                      <h3 className="text-base font-semibold text-[#F4F4F5]">
+                        {item.title}
+                      </h3>
+                    </div>
+                    <div className="text-xs text-[#9CA3AF] font-mono">
+                      {item.subtitle}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-400 font-mono">{item.subtitle}</div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    <button
+                      onClick={() => onInspectMission(item.missionId)}
+                      className="px-2.5 py-1.5 rounded-md bg-[#15181E] hover:bg-[#242830] border border-[#242830] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs font-mono flex items-center gap-1.5 cursor-pointer transition"
+                      title="Inspect Ed25519 Signed Sandbox Execution Chain"
+                    >
+                      <Fingerprint className="w-3.5 h-3.5 text-[#38BDF8]" />
+                      <span>Receipt {item.receiptHeadHash.slice(0, 8)}...</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+
+                    <button
+                      onClick={() => void onDecide(item.id, 'rejected')}
+                      className="px-3 py-1.5 rounded-md bg-[#15181E] hover:bg-[#F87171]/10 border border-[#242830] hover:border-[#F87171]/40 text-[#9CA3AF] hover:text-[#F87171] text-xs font-medium flex items-center gap-1 cursor-pointer transition"
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      <span>Reject</span>
+                    </button>
+
+                    <button
+                      onClick={() => void onDecide(item.id, 'approved')}
+                      className="px-3.5 py-1.5 rounded-md bg-[#34D399] hover:bg-[#6EE7B7] text-[#0B0D10] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition shadow-sm"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Approve &amp; Execute</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onInspectMission(item.missionId)}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-purple-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer"
-                    title="Inspect Ed25519 Signed Sandbox Execution Chain"
-                  >
-                    <Fingerprint className="w-3.5 h-3.5" />
-                    <span>Receipt {item.receiptHeadHash.slice(0, 10)}...</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => void onDecide(item.id, 'rejected')}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 text-xs font-medium flex items-center gap-1 cursor-pointer"
-                  >
-                    <XCircle className="w-3.5 h-3.5" />
-                    <span>Reject</span>
-                  </button>
-                  <button
-                    onClick={() => void onDecide(item.id, 'approved')}
-                    className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Approve &amp; Execute</span>
-                  </button>
+                {/* Proposed Action */}
+                <div className="text-xs text-[#9CA3AF] border-t border-[#242830] pt-3">
+                  <span className="font-medium text-[#F4F4F5]">Proposed Action: </span>
+                  <span>{item.recommendedAction}</span>
+                </div>
+
+                {/* Prepared Memo / Outbound Preview */}
+                <div className="rounded-md border border-[#242830] bg-[#0D0F12] p-4 space-y-1.5">
+                  <div className="text-[11px] font-mono text-[#6B7280]">
+                    Prepared Outbound Communication / Action Memo
+                  </div>
+                  <div className="text-xs text-[#9CA3AF] whitespace-pre-wrap leading-relaxed font-sans">
+                    {item.draftCommunication}
+                  </div>
                 </div>
               </div>
-
-              <div className="text-xs text-sky-300">
-                <strong className="text-slate-300">Proposed Action:</strong>{' '}
-                {item.recommendedAction}
-              </div>
-
-              <div className="rounded-lg border border-slate-800 bg-[#060911] p-3">
-                <div className="text-[10px] font-mono uppercase text-slate-500 mb-1">
-                  Prepared Outbound Communication / Action Memo
-                </div>
-                <pre className="text-xs text-slate-300 whitespace-pre-wrap font-sans leading-relaxed">
-                  {item.draftCommunication}
-                </pre>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
+      {/* Audit Log */}
       {history.length > 0 && (
-        <div className="space-y-2 pt-3 border-t border-slate-800">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="space-y-3 pt-4 border-t border-[#242830]">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
             Completed Human Sign-Off Audit Log
           </div>
-          {history.map((h) => (
-            <div
-              key={h.id}
-              className="rounded-lg border border-slate-800 bg-[#090e1a] px-4 py-2.5 flex items-center justify-between gap-2 text-xs"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded ${
-                    h.status === 'approved'
-                      ? 'bg-emerald-500/15 text-emerald-300'
-                      : 'bg-rose-500/15 text-rose-300'
-                  }`}
-                >
-                  {h.status}
-                </span>
-                <span className="text-slate-200 font-medium truncate">{h.title}</span>
-              </div>
-              <button
-                onClick={() => onInspectMission(h.missionId)}
-                className="text-[11px] font-mono text-sky-400 hover:underline shrink-0 cursor-pointer"
+          <div className="rounded-lg border border-[#242830] bg-[#111419] divide-y divide-[#242830] overflow-hidden">
+            {history.map((h) => (
+              <div
+                key={h.id}
+                className="px-4 py-3 flex items-center justify-between gap-4 text-xs"
               >
-                Proof ({h.missionId}) →
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-medium ${
+                      h.status === 'approved'
+                        ? 'bg-[#34D399]/15 text-[#34D399]'
+                        : 'bg-[#F87171]/15 text-[#F87171]'
+                    }`}
+                  >
+                    {h.status}
+                  </span>
+                  <span className="text-[#F4F4F5] font-medium truncate">{h.title}</span>
+                </div>
+                <button
+                  onClick={() => onInspectMission(h.missionId)}
+                  className="text-[11px] font-mono text-[#38BDF8] hover:underline shrink-0 cursor-pointer flex items-center gap-1"
+                >
+                  <span>Proof ({h.missionId.slice(0, 10)})</span>
+                  <ExternalLink className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

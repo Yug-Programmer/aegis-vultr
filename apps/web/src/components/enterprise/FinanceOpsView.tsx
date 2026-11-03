@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-  Receipt,
   Play,
   Plus,
   Loader2,
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
+  X,
 } from 'lucide-react';
 import type { FinanceInvoice } from '@aegis/shared';
 
@@ -66,40 +66,41 @@ export function FinanceOpsView({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-5 max-w-7xl mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-7xl mx-auto w-full">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#242830]">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-emerald-400" />
-            Finance &amp; Accounting — 3-Way AP Ledger Reconciliation
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Executes deterministic Python 3-way matching inside the Vultr sandbox to detect
-            duplicate invoices, PO cap overcharges, and vendor bank IBAN tampering.
+          <h1 className="text-2xl font-semibold text-[#F4F4F5] tracking-tight">
+            Finance &amp; Accounting
+          </h1>
+          <p className="text-xs text-[#9CA3AF] mt-1">
+            Three-way AP reconciliation, fraud detection, and invoice verification.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {latestMissionId && (
             <button
               onClick={() => onInspectMission(latestMissionId)}
-              className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-md bg-[#111419] hover:bg-[#15181E] border border-[#242830] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs font-mono flex items-center gap-1.5 cursor-pointer transition"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-              <span>View CFO SVG &amp; HTML Audit Pack</span>
+              <ExternalLink className="w-3.5 h-3.5 text-[#34D399]" />
+              <span>CFO Audit Pack</span>
             </button>
           )}
+
           <button
             onClick={() => setShowAdd(!showAdd)}
-            className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-1.5 rounded-md bg-[#111419] hover:bg-[#15181E] border border-[#242830] text-[#9CA3AF] hover:text-[#F4F4F5] text-xs font-medium flex items-center gap-1.5 cursor-pointer transition"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Submit Invoice</span>
+            {showAdd ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+            <span>{showAdd ? 'Cancel' : 'Submit Invoice'}</span>
           </button>
+
           <button
             onClick={() => void onRunReconciliation()}
             disabled={isBusy || anyReconciling}
-            className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition"
+            className="px-3.5 py-1.5 rounded-md bg-[#34D399] hover:bg-[#6EE7B7] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition shadow-sm"
           >
             {anyReconciling ? (
               <>
@@ -116,64 +117,91 @@ export function FinanceOpsView({
         </div>
       </div>
 
+      {/* Add Invoice Form */}
       {showAdd && (
         <form
           onSubmit={handleCreate}
-          className="rounded-xl border border-emerald-500/35 bg-[#0a141d] p-4 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs"
+          className="rounded-lg border border-[#242830] bg-[#111419] p-5 space-y-4"
         >
-          <input
-            required
-            placeholder="Vendor Name"
-            value={vendorName}
-            onChange={(e) => setVendorName(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 text-slate-100"
-          />
-          <input
-            placeholder="Invoice #"
-            value={invoiceNumber}
-            onChange={(e) => setInvoiceNumber(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-slate-100"
-          />
-          <input
-            placeholder="Approved PO #"
-            value={poNumber}
-            onChange={(e) => setPoNumber(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-slate-100"
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="number"
-              placeholder="PO Cap $"
-              title="Approved Purchase Order Amount ($)"
-              value={expectedPoAmountUsd}
-              onChange={(e) => setExpectedPoAmountUsd(Number(e.target.value))}
-              className="rounded-md bg-slate-950 border border-slate-700 px-2.5 py-2 font-mono text-slate-100"
-            />
-            <input
-              type="number"
-              placeholder="Billed $"
-              title="Invoice Billed Amount ($)"
-              value={billedAmountUsd}
-              onChange={(e) => setBilledAmountUsd(Number(e.target.value))}
-              className="rounded-md bg-slate-950 border border-slate-700 px-2.5 py-2 font-mono text-amber-300"
-            />
+          <div className="text-xs font-semibold text-[#F4F4F5]">
+            Submit Vendor AP Invoice
           </div>
-          <input
-            placeholder="Invoice Remittance IBAN Last 4"
-            value={ibanLast4}
-            onChange={(e) => setIbanLast4(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-slate-100"
-          />
-          <input
-            placeholder="Master Vendor IBAN Last 4"
-            value={expectedIbanLast4}
-            onChange={(e) => setExpectedIbanLast4(e.target.value)}
-            className="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 font-mono text-slate-100"
-          />
-          <div className="sm:col-span-2 flex justify-end">
+
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Vendor Name</label>
+              <input
+                required
+                placeholder="Vendor Name"
+                value={vendorName}
+                onChange={(e) => setVendorName(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Invoice #</label>
+              <input
+                placeholder="INV-2026-4099"
+                value={invoiceNumber}
+                onChange={(e) => setInvoiceNumber(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Approved PO #</label>
+              <input
+                placeholder="PO-9200"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] text-[#9CA3AF] mb-1">PO Cap ($)</label>
+                <input
+                  type="number"
+                  placeholder="12000"
+                  value={expectedPoAmountUsd}
+                  onChange={(e) => setExpectedPoAmountUsd(Number(e.target.value))}
+                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-2.5 py-2 font-mono text-[#F4F4F5] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-[#9CA3AF] mb-1">Billed ($)</label>
+                <input
+                  type="number"
+                  placeholder="15400"
+                  value={billedAmountUsd}
+                  onChange={(e) => setBilledAmountUsd(Number(e.target.value))}
+                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-2.5 py-2 font-mono text-[#FBBF24] outline-none"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Invoice IBAN Last 4</label>
+              <input
+                placeholder="9981"
+                value={ibanLast4}
+                onChange={(e) => setIbanLast4(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#F4F4F5] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[#9CA3AF] mb-1">Expected Master IBAN Last 4</label>
+              <input
+                placeholder="9981"
+                value={expectedIbanLast4}
+                onChange={(e) => setExpectedIbanLast4(e.target.value)}
+                className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-2 font-mono text-[#F4F4F5] outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold cursor-pointer"
+              className="px-4 py-2 rounded-md bg-[#34D399] hover:bg-[#6EE7B7] text-[#0B0D10] font-semibold text-xs cursor-pointer transition"
             >
               Add to AP Ledger
             </button>
@@ -182,80 +210,103 @@ export function FinanceOpsView({
       )}
 
       {/* AP Ledger Table */}
-      <div className="rounded-xl border border-slate-800 bg-[#090e1a] overflow-hidden">
+      <div className="rounded-lg border border-[#242830] bg-[#111419] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/70 text-[11px] font-mono uppercase text-slate-400">
-                <th className="py-3 px-4">Invoice / PO</th>
-                <th className="py-3 px-4">Vendor</th>
-                <th className="py-3 px-4">Approved PO</th>
-                <th className="py-3 px-4">Billed</th>
-                <th className="py-3 px-4">IBAN Check</th>
-                <th className="py-3 px-4">Status &amp; Control Verdict</th>
+              <tr className="border-b border-[#242830] bg-[#0D0F12] text-[11px] font-mono uppercase text-[#6B7280]">
+                <th className="py-3 px-5 font-medium">Invoice / PO</th>
+                <th className="py-3 px-5 font-medium">Vendor</th>
+                <th className="py-3 px-5 font-medium">Approved PO</th>
+                <th className="py-3 px-5 font-medium">Billed</th>
+                <th className="py-3 px-5 font-medium">IBAN Check</th>
+                <th className="py-3 px-5 font-medium">Status &amp; Control Verdict</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-[#242830]">
               {invoices.map((inv) => {
                 const flagged =
                   inv.status === 'anomaly_flagged' || inv.status === 'payment_held';
                 const clean =
                   inv.status === 'reconciled' || inv.status === 'approved_for_payment';
+                const isOvercharged =
+                  inv.billedAmountUsd > inv.expectedPoAmountUsd * 1.02;
+                const isIbanMismatch =
+                  inv.ibanLast4 !== inv.expectedIbanLast4;
+
                 return (
-                  <tr key={inv.id} className="hover:bg-slate-900/40 transition">
-                    <td className="py-3.5 px-4 font-mono">
-                      <div className="font-semibold text-white">{inv.invoiceNumber}</div>
-                      <div className="text-[11px] text-slate-500">
-                        {inv.poNumber} • Due {inv.dueDate}
+                  <tr
+                    key={inv.id}
+                    className="hover:bg-[#15181E] transition"
+                  >
+                    {/* Invoice / PO */}
+                    <td className="py-3.5 px-5 font-mono">
+                      <div className="font-medium text-[#F4F4F5]">{inv.invoiceNumber}</div>
+                      <div className="text-[11px] text-[#6B7280]">
+                        {inv.poNumber} · Due {inv.dueDate}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-medium text-slate-200">{inv.vendorName}</div>
-                      <div className="text-[11px] text-slate-500">{inv.category}</div>
+
+                    {/* Vendor */}
+                    <td className="py-3.5 px-5">
+                      <div className="font-medium text-[#F4F4F5]">{inv.vendorName}</div>
+                      <div className="text-[11px] text-[#6B7280]">{inv.category}</div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-300">
+
+                    {/* Approved PO */}
+                    <td className="py-3.5 px-5 font-mono text-[#9CA3AF]">
                       ${inv.expectedPoAmountUsd.toLocaleString()}
                     </td>
-                    <td className="py-3.5 px-4 font-mono">
+
+                    {/* Billed */}
+                    <td className="py-3.5 px-5 font-mono">
                       <span
                         className={
-                          inv.billedAmountUsd > inv.expectedPoAmountUsd * 1.02
-                            ? 'text-rose-300 font-semibold'
-                            : 'text-white'
+                          isOvercharged
+                            ? 'text-[#F87171] font-semibold'
+                            : 'text-[#F4F4F5]'
                         }
                       >
                         ${inv.billedAmountUsd.toLocaleString()}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-[11px]">
+
+                    {/* IBAN Check */}
+                    <td className="py-3.5 px-5 font-mono text-[11px]">
                       <span
                         className={
-                          inv.ibanLast4 !== inv.expectedIbanLast4
-                            ? 'text-rose-400 font-semibold'
-                            : 'text-slate-400'
+                          isIbanMismatch
+                            ? 'text-[#F87171] font-medium'
+                            : 'text-[#6B7280]'
                         }
                       >
                         *{inv.ibanLast4} vs *{inv.expectedIbanLast4}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
+
+                    {/* Status & Control Verdict */}
+                    <td className="py-3.5 px-5">
                       <div className="flex items-center gap-2">
-                        {flagged && <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />}
-                        {clean && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                        {flagged && (
+                          <AlertTriangle className="w-3.5 h-3.5 text-[#F87171] shrink-0" />
+                        )}
+                        {clean && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399] shrink-0" />
+                        )}
                         <span
-                          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
+                          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded ${
                             flagged
-                              ? 'bg-rose-500/15 text-rose-300 border-rose-500/35'
+                              ? 'bg-[#F87171]/15 text-[#F87171] border border-[#F87171]/25'
                               : clean
-                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
-                                : 'bg-slate-800 text-slate-300 border-slate-700'
+                                ? 'bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/25'
+                                : 'bg-[#15181E] text-[#9CA3AF] border border-[#242830]'
                           }`}
                         >
                           {inv.anomalyType !== 'NONE' ? inv.anomalyType : inv.status}
                         </span>
                       </div>
                       {inv.auditNotes && (
-                        <div className="text-[11px] text-slate-400 mt-1 max-w-md leading-snug">
+                        <div className="text-[11px] text-[#9CA3AF] mt-1 max-w-sm leading-snug">
                           {inv.auditNotes}
                         </div>
                       )}
