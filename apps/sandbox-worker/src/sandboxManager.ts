@@ -128,6 +128,16 @@ export class SandboxManager {
     await fs.mkdir(guardDir, { recursive: true });
     await fs.mkdir(tmpDir, { recursive: true });
 
+    // Ensure non-root container user (uid 1000) has write access on Linux
+    if (process.platform === 'linux') {
+      try {
+        await fs.chmod(workspaceDir, 0o777);
+        await fs.chmod(tmpDir, 0o777);
+      } catch {
+        // ignore
+      }
+    }
+
     this.sandboxes.set(sandboxId, {
       id: sandboxId,
       rootDir: baseRoot,
