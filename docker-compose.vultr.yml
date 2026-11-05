@@ -6,8 +6,7 @@ services:
       dockerfile: deploy/vultr/Dockerfile.control-plane
     restart: unless-stopped
     ports:
-      - "80:4000"
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     environment:
       - CONTROL_PLANE_PORT=4000
       - SANDBOX_WORKER_URL=http://sandbox-worker:4100
