@@ -7,6 +7,8 @@ import type {
   ApprovalItem,
   EnterpriseOverviewPayload,
   FinanceInvoice,
+  HrCandidate,
+  ProcurementRequisition,
   SalesLead,
   SupportTicket,
 } from '@aegis/shared';
@@ -18,6 +20,8 @@ interface PersistedState {
   leads: SalesLead[];
   invoices: FinanceInvoice[];
   tickets: SupportTicket[];
+  candidates: HrCandidate[];
+  procurements: ProcurementRequisition[];
   approvals: ApprovalItem[];
 }
 
@@ -36,6 +40,7 @@ function buildSeedState(): PersistedState {
         industry: 'Global Knowledge & High-Traffic Web',
         stage: 'new',
         detectedSignals: [],
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -49,6 +54,7 @@ function buildSeedState(): PersistedState {
         industry: 'Developer Tooling & AI Runtime',
         stage: 'new',
         detectedSignals: [],
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -62,6 +68,7 @@ function buildSeedState(): PersistedState {
         industry: 'Developer Platforms & Venture',
         stage: 'new',
         detectedSignals: [],
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -75,6 +82,7 @@ function buildSeedState(): PersistedState {
         industry: 'Supply Chain & Freight',
         stage: 'new',
         detectedSignals: [],
+        isUserCreated: false,
         updatedAt: now,
       },
     ],
@@ -93,6 +101,7 @@ function buildSeedState(): PersistedState {
         status: 'pending_review',
         anomalyType: 'NONE',
         varianceUsd: 0,
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -109,6 +118,7 @@ function buildSeedState(): PersistedState {
         status: 'pending_review',
         anomalyType: 'NONE',
         varianceUsd: 20,
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -125,6 +135,7 @@ function buildSeedState(): PersistedState {
         status: 'pending_review',
         anomalyType: 'NONE',
         varianceUsd: 0,
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -141,6 +152,7 @@ function buildSeedState(): PersistedState {
         status: 'pending_review',
         anomalyType: 'NONE',
         varianceUsd: 0,
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -157,6 +169,7 @@ function buildSeedState(): PersistedState {
         status: 'pending_review',
         anomalyType: 'NONE',
         varianceUsd: 6150,
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -173,6 +186,7 @@ function buildSeedState(): PersistedState {
         status: 'pending_review',
         anomalyType: 'NONE',
         varianceUsd: 0,
+        isUserCreated: false,
         updatedAt: now,
       },
     ],
@@ -195,6 +209,7 @@ function buildSeedState(): PersistedState {
           encodingUsedByCustomer: 'latin1',
           expectedEncoding: 'utf-8',
         },
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -218,6 +233,7 @@ function buildSeedState(): PersistedState {
           billedAmountUsd: 11400,
           requestedRefundUsd: 2850,
         },
+        isUserCreated: false,
         updatedAt: now,
       },
       {
@@ -238,6 +254,117 @@ function buildSeedState(): PersistedState {
           spServerEpochAtValidation: 1793709195,
           configuredAllowedSkewSec: 30,
         },
+        isUserCreated: false,
+        updatedAt: now,
+      },
+    ],
+    candidates: [
+      {
+        id: 'cand_101',
+        candidateName: 'Alexei Voronov',
+        email: 'alexei.voronov@staff-dev.io',
+        appliedRole: 'Staff Distributed Systems Engineer',
+        experienceYears: 8,
+        techStack: ['Rust', 'Go', 'Kubernetes', 'eBPF', 'Docker', 'Distributed Consensus (Raft)'],
+        desiredSalaryUsd: 185000,
+        resumeSummary:
+          'Principal author of multi-region gRPC service meshes. 5 years maintaining low-latency Linux kernel hooks and zero-copy packet processing pipelines.',
+        portfolioUrl: 'https://github.com/example/alexei-mesh',
+        status: 'new',
+        isUserCreated: false,
+        updatedAt: now,
+      },
+      {
+        id: 'cand_102',
+        candidateName: 'Sarah Jenkins',
+        email: 'sarah.jenkins@ai-runtime.net',
+        appliedRole: 'Senior AI Inference Infrastructure Lead',
+        experienceYears: 6,
+        techStack: ['Python', 'PyTorch', 'vLLM', 'CUDA', 'Triton', 'TensorRT-LLM', 'Docker'],
+        desiredSalaryUsd: 175000,
+        resumeSummary:
+          'Specialist in high-throughput LLM serving clusters on Vultr GPU cloud. Reduced p99 token-to-first-token latency by 44% with dynamic batching.',
+        portfolioUrl: 'https://github.com/example/sarah-vllm-bench',
+        status: 'new',
+        isUserCreated: false,
+        updatedAt: now,
+      },
+      {
+        id: 'cand_103',
+        candidateName: 'Kenji Takahashi',
+        email: 'kenji.t@frontend-sec.org',
+        appliedRole: 'Senior Full-Stack & Security Engineer',
+        experienceYears: 5,
+        techStack: ['TypeScript', 'React', 'Node.js', 'WebAuthn', 'SSO/SAML', 'PostgreSQL'],
+        desiredSalaryUsd: 155000,
+        resumeSummary:
+          'Architect of enterprise B2B auth suites, zero-trust RBAC dashboards, and real-time WebSocket state synchronizers.',
+        portfolioUrl: 'https://github.com/example/kenji-sec',
+        status: 'new',
+        isUserCreated: false,
+        updatedAt: now,
+      },
+    ],
+    procurements: [
+      {
+        id: 'req_301',
+        reqNumber: 'REQ-2026-301',
+        title: 'NVIDIA H100 Cloud GPU Cluster (8-Node High-Speed Interconnect)',
+        department: 'AI Research & Platform Ops',
+        targetBudgetUsd: 48000,
+        deliveryDeadline: '2026-11-28',
+        vendorBids: [
+          {
+            vendorName: 'Vultr Cloud Compute',
+            quoteAmountUsd: 41200,
+            deliveryDays: 1,
+            slaGuaranteePercent: 99.99,
+            reliabilityScore: 5,
+          },
+          {
+            vendorName: 'Hyperscale Cloud Corp',
+            quoteAmountUsd: 49800,
+            deliveryDays: 5,
+            slaGuaranteePercent: 99.9,
+            reliabilityScore: 4,
+          },
+          {
+            vendorName: 'Legacy Metal Hosting',
+            quoteAmountUsd: 44500,
+            deliveryDays: 12,
+            slaGuaranteePercent: 99.5,
+            reliabilityScore: 3,
+          },
+        ],
+        status: 'pending_rfp',
+        isUserCreated: false,
+        updatedAt: now,
+      },
+      {
+        id: 'req_302',
+        reqNumber: 'REQ-2026-302',
+        title: 'Global Edge Anycast Transit & WAF DDoS Mitigation Pool',
+        department: 'Backbone Networking',
+        targetBudgetUsd: 22000,
+        deliveryDeadline: '2026-12-05',
+        vendorBids: [
+          {
+            vendorName: 'CloudScale Fiber Edge',
+            quoteAmountUsd: 18900,
+            deliveryDays: 3,
+            slaGuaranteePercent: 99.99,
+            reliabilityScore: 5,
+          },
+          {
+            vendorName: 'Global Shield CDN',
+            quoteAmountUsd: 23400,
+            deliveryDays: 4,
+            slaGuaranteePercent: 99.95,
+            reliabilityScore: 4,
+          },
+        ],
+        status: 'pending_rfp',
+        isUserCreated: false,
         updatedAt: now,
       },
     ],
@@ -256,7 +383,16 @@ export class EnterpriseStore {
     try {
       if (fs.existsSync(STORE_PATH)) {
         const raw = fs.readFileSync(STORE_PATH, 'utf8');
-        this.state = JSON.parse(raw) as PersistedState;
+        const parsed = JSON.parse(raw) as Partial<PersistedState>;
+        const seed = buildSeedState();
+        this.state = {
+          leads: Array.isArray(parsed.leads) ? parsed.leads : seed.leads,
+          invoices: Array.isArray(parsed.invoices) ? parsed.invoices : seed.invoices,
+          tickets: Array.isArray(parsed.tickets) ? parsed.tickets : seed.tickets,
+          candidates: Array.isArray(parsed.candidates) ? parsed.candidates : seed.candidates,
+          procurements: Array.isArray(parsed.procurements) ? parsed.procurements : seed.procurements,
+          approvals: Array.isArray(parsed.approvals) ? parsed.approvals : seed.approvals,
+        };
       } else {
         this.persistSync();
       }
@@ -285,20 +421,35 @@ export class EnterpriseStore {
     return this.getOverview();
   }
 
+  async clearAllData(): Promise<EnterpriseOverviewPayload> {
+    this.state = {
+      leads: [],
+      invoices: [],
+      tickets: [],
+      candidates: [],
+      procurements: [],
+      approvals: [],
+    };
+    await this.save();
+    return this.getOverview();
+  }
+
   getOverview(): EnterpriseOverviewPayload {
     const leads = this.state.leads;
     const invoices = this.state.invoices;
     const tickets = this.state.tickets;
+    const candidates = this.state.candidates;
+    const procurements = this.state.procurements;
     const approvals = [...this.state.approvals].sort((a, b) =>
       b.createdAt.localeCompare(a.createdAt)
     );
 
-    const pipelineArrUsd = leads.reduce((sum, l) => sum + l.estimatedArrUsd, 0);
+    const pipelineArrUsd = leads.reduce((sum, l) => sum + (Number(l.estimatedArrUsd) || 0), 0);
     const qualifiedLeadsCount = leads.filter((l) =>
       ['qualified', 'outreach_queued', 'contacted'].includes(l.stage)
     ).length;
 
-    const totalInvoicedUsd = invoices.reduce((sum, i) => sum + i.billedAmountUsd, 0);
+    const totalInvoicedUsd = invoices.reduce((sum, i) => sum + (Number(i.billedAmountUsd) || 0), 0);
     const reconciledInvoicesCount = invoices.filter(
       (i) => i.status === 'reconciled' || i.status === 'approved_for_payment'
     ).length;
@@ -311,6 +462,20 @@ export class EnterpriseStore {
       }
       return sum + Math.max(0, i.billedAmountUsd - i.expectedPoAmountUsd);
     }, 0);
+
+    const totalCandidatesCount = candidates.length;
+    const screenedCandidatesCount = candidates.filter(
+      (c) => c.status === 'screened' || c.status === 'interview_scheduled'
+    ).length;
+
+    const totalProcurementBudgetUsd = procurements.reduce(
+      (sum, p) => sum + (Number(p.targetBudgetUsd) || 0),
+      0
+    );
+    const procurementSavingsUsd = procurements.reduce(
+      (sum, p) => sum + (Number(p.savingsUsd) || 0),
+      0
+    );
 
     return {
       stats: {
@@ -325,12 +490,23 @@ export class EnterpriseStore {
         autoResolvedTicketsCount: tickets.filter((t) => t.status === 'auto_resolved').length,
         escalatedTicketsCount: tickets.filter((t) => t.status === 'escalated_human').length,
         pendingApprovalsCount: approvals.filter((a) => a.status === 'pending').length,
+        totalCandidatesCount,
+        screenedCandidatesCount,
+        totalProcurementBudgetUsd,
+        procurementSavingsUsd,
       },
       leads,
       invoices,
       tickets,
+      candidates,
+      procurements,
       approvals,
     };
+  }
+
+  // --- SALES LEADS ---
+  getLeads(): SalesLead[] {
+    return this.state.leads;
   }
 
   getLead(id: string): SalesLead | undefined {
@@ -357,6 +533,7 @@ export class EnterpriseStore {
       industry: input.industry.trim() || 'Enterprise Technology',
       stage: 'new',
       detectedSignals: [],
+      isUserCreated: true,
       updatedAt: new Date().toISOString(),
     };
     this.state.leads.unshift(lead);
@@ -372,8 +549,24 @@ export class EnterpriseStore {
     return lead;
   }
 
+  async deleteLead(id: string): Promise<boolean> {
+    const idx = this.state.leads.findIndex((l) => l.id === id);
+    if (idx < 0) return false;
+    this.state.leads.splice(idx, 1);
+    this.state.approvals = this.state.approvals.filter(
+      (a) => !(a.department === 'sales' && a.entityId === id)
+    );
+    await this.save();
+    return true;
+  }
+
+  // --- FINANCE INVOICES ---
   getInvoices(): FinanceInvoice[] {
     return this.state.invoices;
+  }
+
+  getInvoice(id: string): FinanceInvoice | undefined {
+    return this.state.invoices.find((i) => i.id === id);
   }
 
   async addInvoice(input: {
@@ -391,7 +584,9 @@ export class EnterpriseStore {
     const billed = Number(input.billedAmountUsd) || 10000;
     const inv: FinanceInvoice = {
       id: `inv_${crypto.randomBytes(4).toString('hex')}`,
-      invoiceNumber: input.invoiceNumber.trim() || `INV-2026-${Math.floor(5000 + Math.random() * 4000)}`,
+      invoiceNumber:
+        input.invoiceNumber.trim() ||
+        `INV-2026-${Math.floor(5000 + Math.random() * 4000)}`,
       vendorName: input.vendorName.trim(),
       poNumber: input.poNumber.trim() || 'PO-9100',
       category: input.category.trim() || 'Cloud & Software',
@@ -403,6 +598,7 @@ export class EnterpriseStore {
       status: 'pending_review',
       anomalyType: 'NONE',
       varianceUsd: billed - expected,
+      isUserCreated: true,
       updatedAt: new Date().toISOString(),
     };
     this.state.invoices.unshift(inv);
@@ -414,11 +610,27 @@ export class EnterpriseStore {
     id: string,
     patch: Partial<FinanceInvoice>
   ): Promise<FinanceInvoice | undefined> {
-    const inv = this.state.invoices.find((i) => i.id === id);
+    const inv = this.getInvoice(id);
     if (!inv) return undefined;
     Object.assign(inv, patch, { updatedAt: new Date().toISOString() });
     await this.save();
     return inv;
+  }
+
+  async deleteInvoice(id: string): Promise<boolean> {
+    const idx = this.state.invoices.findIndex((i) => i.id === id);
+    if (idx < 0) return false;
+    this.state.invoices.splice(idx, 1);
+    this.state.approvals = this.state.approvals.filter(
+      (a) => !(a.department === 'finance' && a.entityId === id)
+    );
+    await this.save();
+    return true;
+  }
+
+  // --- CUSTOMER SUPPORT ---
+  getTickets(): SupportTicket[] {
+    return this.state.tickets;
   }
 
   getTicket(id: string): SupportTicket | undefined {
@@ -429,9 +641,10 @@ export class EnterpriseStore {
     customerName: string;
     customerTier: 'Enterprise' | 'Growth';
     subject: string;
-    category: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security';
+    category?: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security' | 'Performance & Scale' | 'General Operations';
     priority: 'P1' | 'P2' | 'P3';
     requestedCreditUsd?: number;
+    diagnosticPayload?: Record<string, unknown>;
   }): Promise<SupportTicket> {
     const credit = Number(input.requestedCreditUsd || 0);
     const ticket: SupportTicket = {
@@ -440,17 +653,18 @@ export class EnterpriseStore {
       customerName: input.customerName.trim(),
       customerTier: input.customerTier || 'Enterprise',
       subject: input.subject.trim(),
-      category: input.category || 'API & Webhooks',
+      category: input.category || 'General Operations',
       priority: input.priority || 'P2',
       status: 'open',
       requiresHumanApproval: credit >= 500 || input.priority === 'P1',
       requestedCreditUsd: credit > 0 ? credit : undefined,
-      diagnosticPayload: {
-        issueType: 'custom_ticket_investigation',
+      diagnosticPayload: input.diagnosticPayload || {
+        issueType: 'custom_diagnostic',
         submittedSubject: input.subject.trim(),
         requestedCreditUsd: credit,
-        timestampUtc: new Date().toISOString(),
+        rawLogs: `Customer ${input.customerName} reported: "${input.subject}" at ${new Date().toISOString()}`,
       },
+      isUserCreated: true,
       updatedAt: new Date().toISOString(),
     };
     this.state.tickets.unshift(ticket);
@@ -469,9 +683,145 @@ export class EnterpriseStore {
     return t;
   }
 
+  async deleteTicket(id: string): Promise<boolean> {
+    const idx = this.state.tickets.findIndex((t) => t.id === id);
+    if (idx < 0) return false;
+    this.state.tickets.splice(idx, 1);
+    this.state.approvals = this.state.approvals.filter(
+      (a) => !(a.department === 'support' && a.entityId === id)
+    );
+    await this.save();
+    return true;
+  }
+
+  // --- HR & RECRUITMENT ---
+  getCandidates(): HrCandidate[] {
+    return this.state.candidates;
+  }
+
+  getCandidate(id: string): HrCandidate | undefined {
+    return this.state.candidates.find((c) => c.id === id);
+  }
+
+  async addCandidate(input: {
+    candidateName: string;
+    email: string;
+    appliedRole: string;
+    experienceYears: number;
+    techStack: string[];
+    desiredSalaryUsd: number;
+    resumeSummary: string;
+    portfolioUrl?: string;
+  }): Promise<HrCandidate> {
+    const cand: HrCandidate = {
+      id: `cand_${crypto.randomBytes(4).toString('hex')}`,
+      candidateName: input.candidateName.trim(),
+      email: input.email.trim(),
+      appliedRole: input.appliedRole.trim(),
+      experienceYears: Number(input.experienceYears) || 3,
+      techStack: Array.isArray(input.techStack) ? input.techStack : [input.techStack].filter(Boolean),
+      desiredSalaryUsd: Number(input.desiredSalaryUsd) || 150000,
+      resumeSummary: input.resumeSummary.trim(),
+      portfolioUrl: input.portfolioUrl?.trim(),
+      status: 'new',
+      isUserCreated: true,
+      updatedAt: new Date().toISOString(),
+    };
+    this.state.candidates.unshift(cand);
+    await this.save();
+    return cand;
+  }
+
+  async updateCandidate(
+    id: string,
+    patch: Partial<HrCandidate>
+  ): Promise<HrCandidate | undefined> {
+    const c = this.getCandidate(id);
+    if (!c) return undefined;
+    Object.assign(c, patch, { updatedAt: new Date().toISOString() });
+    await this.save();
+    return c;
+  }
+
+  async deleteCandidate(id: string): Promise<boolean> {
+    const idx = this.state.candidates.findIndex((c) => c.id === id);
+    if (idx < 0) return false;
+    this.state.candidates.splice(idx, 1);
+    this.state.approvals = this.state.approvals.filter(
+      (a) => !(a.department === 'hr' && a.entityId === id)
+    );
+    await this.save();
+    return true;
+  }
+
+  // --- PROCUREMENT ---
+  getProcurements(): ProcurementRequisition[] {
+    return this.state.procurements;
+  }
+
+  getProcurement(id: string): ProcurementRequisition | undefined {
+    return this.state.procurements.find((p) => p.id === id);
+  }
+
+  async addProcurement(input: {
+    title: string;
+    department: string;
+    targetBudgetUsd: number;
+    deliveryDeadline: string;
+    vendorBids: Array<{
+      vendorName: string;
+      quoteAmountUsd: number;
+      deliveryDays: number;
+      slaGuaranteePercent: number;
+      reliabilityScore: number;
+    }>;
+  }): Promise<ProcurementRequisition> {
+    const req: ProcurementRequisition = {
+      id: `req_${crypto.randomBytes(4).toString('hex')}`,
+      reqNumber: `REQ-2026-${Math.floor(310 + Math.random() * 89)}`,
+      title: input.title.trim(),
+      department: input.department.trim() || 'Engineering Infrastructure',
+      targetBudgetUsd: Number(input.targetBudgetUsd) || 25000,
+      deliveryDeadline: input.deliveryDeadline || '2026-12-01',
+      vendorBids: input.vendorBids || [],
+      status: 'pending_rfp',
+      isUserCreated: true,
+      updatedAt: new Date().toISOString(),
+    };
+    this.state.procurements.unshift(req);
+    await this.save();
+    return req;
+  }
+
+  async updateProcurement(
+    id: string,
+    patch: Partial<ProcurementRequisition>
+  ): Promise<ProcurementRequisition | undefined> {
+    const p = this.getProcurement(id);
+    if (!p) return undefined;
+    Object.assign(p, patch, { updatedAt: new Date().toISOString() });
+    await this.save();
+    return p;
+  }
+
+  async deleteProcurement(id: string): Promise<boolean> {
+    const idx = this.state.procurements.findIndex((p) => p.id === id);
+    if (idx < 0) return false;
+    this.state.procurements.splice(idx, 1);
+    this.state.approvals = this.state.approvals.filter(
+      (a) => !(a.department === 'procurement' && a.entityId === id)
+    );
+    await this.save();
+    return true;
+  }
+
+  // --- APPROVALS & HUMAN-IN-THE-LOOP ---
   async upsertApproval(item: Omit<ApprovalItem, 'id' | 'createdAt'>): Promise<ApprovalItem> {
     const existing = this.state.approvals.find(
-      (a) => a.entityId === item.entityId && a.department === item.department && a.status === 'pending'
+      (a) =>
+        a.entityId === item.entityId &&
+        a.department === item.department &&
+        a.status === 'pending'
     );
     if (existing) {
       Object.assign(existing, item);
@@ -511,6 +861,14 @@ export class EnterpriseStore {
     } else if (apr.department === 'support') {
       await this.updateTicket(apr.entityId, {
         status: decision === 'approved' ? 'resolved' : 'open',
+      });
+    } else if (apr.department === 'hr') {
+      await this.updateCandidate(apr.entityId, {
+        status: decision === 'approved' ? 'interview_scheduled' : 'rejected',
+      });
+    } else if (apr.department === 'procurement') {
+      await this.updateProcurement(apr.entityId, {
+        status: decision === 'approved' ? 'po_approved' : 'rejected',
       });
     }
 

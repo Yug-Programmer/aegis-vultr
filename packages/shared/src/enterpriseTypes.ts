@@ -22,6 +22,7 @@ export interface SalesLead {
   draftOutreachSubject?: string;
   draftOutreachBody?: string;
   lastMissionId?: string;
+  isUserCreated?: boolean;
   updatedAt: string;
 }
 
@@ -57,6 +58,7 @@ export interface FinanceInvoice {
   auditNotes?: string;
   followUpDraft?: string;
   lastMissionId?: string;
+  isUserCreated?: boolean;
   updatedAt: string;
 }
 
@@ -73,7 +75,7 @@ export interface SupportTicket {
   customerName: string;
   customerTier: 'Enterprise' | 'Growth';
   subject: string;
-  category: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security';
+  category: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security' | 'Performance & Scale' | 'General Operations';
   priority: 'P1' | 'P2' | 'P3';
   status: SupportTicketStatus;
   diagnosticPayload: Record<string, unknown>;
@@ -82,10 +84,70 @@ export interface SupportTicket {
   requiresHumanApproval: boolean;
   requestedCreditUsd?: number;
   lastMissionId?: string;
+  isUserCreated?: boolean;
   updatedAt: string;
 }
 
-export type ApprovalDepartment = 'sales' | 'finance' | 'support';
+export type HrCandidateStatus =
+  | 'new'
+  | 'screening'
+  | 'screened'
+  | 'interview_scheduled'
+  | 'rejected';
+
+export interface HrCandidate {
+  id: string;
+  candidateName: string;
+  email: string;
+  appliedRole: string;
+  experienceYears: number;
+  techStack: string[];
+  desiredSalaryUsd: number;
+  resumeSummary: string;
+  portfolioUrl?: string;
+  status: HrCandidateStatus;
+  fitScore?: number;
+  evaluationSummary?: string;
+  interviewGuide?: string;
+  lastMissionId?: string;
+  isUserCreated?: boolean;
+  updatedAt: string;
+}
+
+export interface ProcurementVendorBid {
+  vendorName: string;
+  quoteAmountUsd: number;
+  deliveryDays: number;
+  slaGuaranteePercent: number;
+  reliabilityScore: number; // 1 to 5
+}
+
+export type ProcurementStatus =
+  | 'pending_rfp'
+  | 'evaluating'
+  | 'vendor_selected'
+  | 'po_approved'
+  | 'rejected';
+
+export interface ProcurementRequisition {
+  id: string;
+  reqNumber: string;
+  title: string;
+  department: string;
+  targetBudgetUsd: number;
+  deliveryDeadline: string;
+  vendorBids: ProcurementVendorBid[];
+  status: ProcurementStatus;
+  selectedVendor?: string;
+  recommendedQuoteUsd?: number;
+  savingsUsd?: number;
+  evaluationNotes?: string;
+  lastMissionId?: string;
+  isUserCreated?: boolean;
+  updatedAt: string;
+}
+
+export type ApprovalDepartment = 'sales' | 'finance' | 'support' | 'hr' | 'procurement';
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 export interface ApprovalItem {
@@ -119,9 +181,16 @@ export interface EnterpriseOverviewPayload {
     autoResolvedTicketsCount: number;
     escalatedTicketsCount: number;
     pendingApprovalsCount: number;
+    // HR & Procurement stats:
+    totalCandidatesCount: number;
+    screenedCandidatesCount: number;
+    totalProcurementBudgetUsd: number;
+    procurementSavingsUsd: number;
   };
   leads: SalesLead[];
   invoices: FinanceInvoice[];
   tickets: SupportTicket[];
+  candidates: HrCandidate[];
+  procurements: ProcurementRequisition[];
   approvals: ApprovalItem[];
 }

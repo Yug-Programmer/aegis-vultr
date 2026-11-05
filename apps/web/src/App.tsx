@@ -8,6 +8,7 @@ import {
   Receipt,
   LifeBuoy,
   UserCheck,
+  Layers,
   TerminalSquare,
   Loader2,
   ChevronRight,
@@ -18,18 +19,28 @@ import type {
   NetworkPolicyMode,
 } from '@aegis/shared';
 import {
+  clearEnterpriseDataset,
   createFinanceInvoice,
+  createHrCandidate,
   createMission,
+  createProcurementRequisition,
   createSalesLead,
   createSupportTicket,
   decideApprovalItem,
+  deleteFinanceInvoice,
+  deleteHrCandidate,
+  deleteProcurementRequisition,
+  deleteSalesLead,
+  deleteSupportTicket,
   fetchEnterpriseOverview,
   fetchMission,
   fetchMissions,
   fetchSystemStatus,
   resetEnterpriseDataset,
   subscribeToMissionEvents,
+  triggerCandidateScreening,
   triggerFinanceReconciliation,
+  triggerProcurementEvaluation,
   triggerSalesLeadQualification,
   triggerSupportInvestigation,
   type SystemStatusResponse,
@@ -49,7 +60,9 @@ import {
 } from './components/enterprise/EnterpriseOverviewView';
 import { SalesOpsView } from './components/enterprise/SalesOpsView';
 import { FinanceOpsView } from './components/enterprise/FinanceOpsView';
+import { HrOpsView } from './components/enterprise/HrOpsView';
 import { SupportOpsView } from './components/enterprise/SupportOpsView';
+import { ProcurementOpsView } from './components/enterprise/ProcurementOpsView';
 import { ApprovalsView } from './components/enterprise/ApprovalsView';
 
 type InspectorTab = 'browser' | 'artifacts' | 'receipts';
@@ -168,9 +181,19 @@ export function App() {
       icon: Receipt,
     },
     {
+      id: 'hr' as const,
+      label: 'HR & Recruitment',
+      icon: UserCheck,
+    },
+    {
       id: 'support' as const,
       label: 'Customer Support',
       icon: LifeBuoy,
+    },
+    {
+      id: 'procurement' as const,
+      label: 'Procurement & RFP',
+      icon: Layers,
     },
     {
       id: 'approvals' as const,
@@ -198,7 +221,7 @@ export function App() {
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Modern Vertical Application Sidebar */}
-        <aside className="w-[210px] bg-[#0B0D10] border-r border-[#1E232B] flex flex-col justify-between shrink-0 select-none">
+        <aside className="w-[215px] bg-[#0B0D10] border-r border-[#1E232B] flex flex-col justify-between shrink-0 select-none">
           {/* Navigation Section */}
           <div className="p-2 space-y-0.5">
             {navItems.map((item) => {
@@ -270,6 +293,10 @@ export function App() {
                 const fresh = await resetEnterpriseDataset();
                 setEnterprise(fresh);
               }}
+              onClearData={async () => {
+                const fresh = await clearEnterpriseDataset();
+                setEnterprise(fresh);
+              }}
               onQuickQualifyTopLead={async () => {
                 const target =
                   enterprise?.leads.find((l) => l.stage === 'new') || enterprise?.leads[0];
@@ -294,6 +321,24 @@ export function App() {
                 setActiveMission(res.mission);
                 setWorkspaceTab('studio');
               }}
+              onQuickScreenCandidate={async () => {
+                const target =
+                  enterprise?.candidates.find((c) => c.status === 'new') || enterprise?.candidates[0];
+                if (!target) return;
+                const res = await triggerCandidateScreening(target.id);
+                setEnterprise(res.overview);
+                setActiveMission(res.mission);
+                setWorkspaceTab('studio');
+              }}
+              onQuickEvaluateProcurement={async () => {
+                const target =
+                  enterprise?.procurements.find((p) => p.status === 'pending_rfp') || enterprise?.procurements[0];
+                if (!target) return;
+                const res = await triggerProcurementEvaluation(target.id);
+                setEnterprise(res.overview);
+                setActiveMission(res.mission);
+                setWorkspaceTab('studio');
+              }}
             />
           )}
 
@@ -303,6 +348,10 @@ export function App() {
               isBusy={Boolean(isRunning)}
               onAddLead={async (payload) => {
                 const res = await createSalesLead(payload);
+                setEnterprise(res.overview);
+              }}
+              onDeleteLead={async (leadId) => {
+                const res = await deleteSalesLead(leadId);
                 setEnterprise(res.overview);
               }}
               onQualifyLead={async (leadId) => {
@@ -322,8 +371,33 @@ export function App() {
                 const res = await createFinanceInvoice(payload);
                 setEnterprise(res.overview);
               }}
-              onRunReconciliation={async () => {
+              onDeleteInvoice={async (invoiceId) => {
+                const res = await deleteFinanceInvoice(invoiceId);
+                setEnterprise(res.overview);
+              }}
+              onReconcileLedger={async () => {
                 const res = await triggerFinanceReconciliation();
+                setEnterprise(res.overview);
+                setActiveMission(res.mission);
+              }}
+              onInspectMission={(msnId) => void handleSelectMission(msnId)}
+            />
+          )}
+
+          {workspaceTab === 'hr' && (
+            <HrOpsView
+              candidates={enterprise?.candidates || []}
+              isBusy={Boolean(isRunning)}
+              onAddCandidate={async (payload) => {
+                const res = await createHrCandidate(payload);
+                setEnterprise(res.overview);
+              }}
+              onDeleteCandidate={async (candidateId) => {
+                const res = await deleteHrCandidate(candidateId);
+                setEnterprise(res.overview);
+              }}
+              onScreenCandidate={async (candidateId) => {
+                const res = await triggerCandidateScreening(candidateId);
                 setEnterprise(res.overview);
                 setActiveMission(res.mission);
               }}
@@ -339,8 +413,33 @@ export function App() {
                 const res = await createSupportTicket(payload);
                 setEnterprise(res.overview);
               }}
+              onDeleteTicket={async (ticketId) => {
+                const res = await deleteSupportTicket(ticketId);
+                setEnterprise(res.overview);
+              }}
               onInvestigateTicket={async (ticketId) => {
                 const res = await triggerSupportInvestigation(ticketId);
+                setEnterprise(res.overview);
+                setActiveMission(res.mission);
+              }}
+              onInspectMission={(msnId) => void handleSelectMission(msnId)}
+            />
+          )}
+
+          {workspaceTab === 'procurement' && (
+            <ProcurementOpsView
+              procurements={enterprise?.procurements || []}
+              isBusy={Boolean(isRunning)}
+              onAddProcurement={async (payload) => {
+                const res = await createProcurementRequisition(payload);
+                setEnterprise(res.overview);
+              }}
+              onDeleteProcurement={async (procurementId) => {
+                const res = await deleteProcurementRequisition(procurementId);
+                setEnterprise(res.overview);
+              }}
+              onEvaluateProcurement={async (procurementId) => {
+                const res = await triggerProcurementEvaluation(procurementId);
                 setEnterprise(res.overview);
                 setActiveMission(res.mission);
               }}

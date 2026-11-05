@@ -5,8 +5,10 @@ import type {
   ContainmentPolicy,
   EnterpriseOverviewPayload,
   FinanceInvoice,
+  HrCandidate,
   MissionEvent,
   MissionRecord,
+  ProcurementRequisition,
   SalesLead,
   SandboxWorkerHealth,
   SupportTicket,
@@ -99,25 +101,46 @@ export async function createMission(opts: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(opts),
   });
-  const data = (await res.json()) as { mission?: MissionRecord; error?: string };
-  if (!res.ok || !data.mission) {
-    throw new Error(data.error || `Failed to create mission (${res.status})`);
-  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to start mission');
   return data.mission;
+}
+
+export async function verifyMission(id: string): Promise<ChainVerificationResult> {
+  const res = await fetch(`/api/missions/${encodeURIComponent(id)}/verify`);
+  if (!res.ok) throw new Error(`Verification failed: ${res.status}`);
+  return (await res.json()) as ChainVerificationResult;
+}
+
+export async function runContainmentAudit(): Promise<ContainmentAuditReport> {
+  const res = await fetch('/api/containment/audit', { method: 'POST' });
+  if (!res.ok) throw new Error(`Audit failed: ${res.status}`);
+  const data = (await res.json()) as { report: ContainmentAuditReport };
+  return data.report;
+}
+
+export async function fetchVultrOverview(): Promise<VultrOverviewResponse> {
+  const res = await fetch('/api/vultr/overview');
+  if (!res.ok) throw new Error(`Vultr overview failed: ${res.status}`);
+  return (await res.json()) as VultrOverviewResponse;
 }
 
 export function subscribeToMissionEvents(
   missionId: string,
-  onEvent: (ev: MissionEvent) => void
+  onEvent: (event: MissionEvent) => void,
+  onError?: (err: unknown) => void
 ): () => void {
   const es = new EventSource(`/api/missions/${encodeURIComponent(missionId)}/stream`);
   es.onmessage = (msg) => {
     try {
       const parsed = JSON.parse(msg.data) as MissionEvent;
       onEvent(parsed);
-    } catch {
-      // ignore heartbeat
+    } catch (e) {
+      onError?.(e);
     }
+  };
+  es.onerror = (err) => {
+    onError?.(err);
   };
   return () => {
     es.close();
@@ -133,19 +156,6 @@ export async function verifyMissionReceipts(id: string): Promise<ChainVerificati
 export function getArtifactUrl(missionId: string, relativePath: string, download = false): string {
   const dl = download ? '&download=1' : '';
   return `/api/missions/${encodeURIComponent(missionId)}/artifact?path=${encodeURIComponent(relativePath)}${dl}`;
-}
-
-export async function runContainmentAudit(): Promise<ContainmentAuditReport> {
-  const res = await fetch('/api/containment/audit', { method: 'POST' });
-  const data = (await res.json()) as ContainmentAuditReport & { error?: string };
-  if (!res.ok) throw new Error(data.error || 'Containment audit failed');
-  return data;
-}
-
-export async function fetchVultrOverview(): Promise<VultrOverviewResponse> {
-  const res = await fetch('/api/vultr/overview');
-  if (!res.ok) throw new Error('Failed to load Vultr overview');
-  return (await res.json()) as VultrOverviewResponse;
 }
 
 export async function saveRuntimeSettings(payload: Record<string, unknown>): Promise<void> {
@@ -177,18 +187,34 @@ export async function provisionVultrSandboxNode(payload: {
   return data;
 }
 
+export function getArtifactDownloadUrl(missionId: string, filename: string): string {
+  return `/api/missions/${encodeURIComponent(missionId)}/artifacts/${encodeURIComponent(filename)}`;
+}
+
+// ==========================================
+// ENTERPRISE WORKFLOWS & DATA ENGINE (5 DEPARTMENTS)
+// ==========================================
+
 export async function fetchEnterpriseOverview(): Promise<EnterpriseOverviewPayload> {
   const res = await fetch('/api/enterprise/overview');
-  if (!res.ok) throw new Error('Failed to load enterprise overview');
-  return (await res.json()) as EnterpriseOverviewPayload;
+  if (!res.ok) throw new Error(`Enterprise overview failed: ${res.status}`);
+  const data = (await res.json()) as { overview: EnterpriseOverviewPayload };
+  return data.overview;
 }
 
 export async function resetEnterpriseDataset(): Promise<EnterpriseOverviewPayload> {
   const res = await fetch('/api/enterprise/reset', { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to reset dataset');
-  return (await res.json()) as EnterpriseOverviewPayload;
+  const data = (await res.json()) as EnterpriseOverviewPayload;
+  return data;
 }
 
+export async function clearEnterpriseDataset(): Promise<EnterpriseOverviewPayload> {
+  const res = await fetch('/api/enterprise/clear', { method: 'POST' });
+  const data = (await res.json()) as EnterpriseOverviewPayload;
+  return data;
+}
+
+// 1. SALES OPERATIONS
 export async function createSalesLead(payload: {
   company: string;
   domainUrl: string;
@@ -208,6 +234,17 @@ export async function createSalesLead(payload: {
   return data;
 }
 
+export async function deleteSalesLead(
+  leadId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete lead');
+  return data;
+}
+
 export async function triggerSalesLeadQualification(
   leadId: string
 ): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
@@ -219,6 +256,7 @@ export async function triggerSalesLeadQualification(
   return data;
 }
 
+// 2. FINANCE & ACCOUNTING
 export async function createFinanceInvoice(payload: {
   invoiceNumber: string;
   vendorName: string;
@@ -240,6 +278,17 @@ export async function createFinanceInvoice(payload: {
   return data;
 }
 
+export async function deleteFinanceInvoice(
+  invoiceId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(`/api/enterprise/finance/invoices/${encodeURIComponent(invoiceId)}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete invoice');
+  return data;
+}
+
 export async function triggerFinanceReconciliation(): Promise<{
   mission: MissionRecord;
   overview: EnterpriseOverviewPayload;
@@ -250,13 +299,15 @@ export async function triggerFinanceReconciliation(): Promise<{
   return data;
 }
 
+// 3. CUSTOMER SUPPORT
 export async function createSupportTicket(payload: {
   customerName: string;
   customerTier: 'Enterprise' | 'Growth';
   subject: string;
-  category: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security';
+  category?: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security' | 'Performance & Scale' | 'General Operations';
   priority: 'P1' | 'P2' | 'P3';
   requestedCreditUsd?: number;
+  diagnosticPayload?: Record<string, unknown>;
 }): Promise<{ ticket: SupportTicket; overview: EnterpriseOverviewPayload }> {
   const res = await fetch('/api/enterprise/support/tickets', {
     method: 'POST',
@@ -265,6 +316,17 @@ export async function createSupportTicket(payload: {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to create ticket');
+  return data;
+}
+
+export async function deleteSupportTicket(
+  ticketId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(`/api/enterprise/support/tickets/${encodeURIComponent(ticketId)}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete ticket');
   return data;
 }
 
@@ -280,6 +342,97 @@ export async function triggerSupportInvestigation(
   return data;
 }
 
+// 4. HR & RECRUITMENT
+export async function createHrCandidate(payload: {
+  candidateName: string;
+  email: string;
+  appliedRole: string;
+  experienceYears: number;
+  techStack: string[];
+  desiredSalaryUsd: number;
+  resumeSummary: string;
+  portfolioUrl?: string;
+}): Promise<{ candidate: HrCandidate; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch('/api/enterprise/hr/candidates', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to add candidate');
+  return data;
+}
+
+export async function deleteHrCandidate(
+  candidateId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(`/api/enterprise/hr/candidates/${encodeURIComponent(candidateId)}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete candidate');
+  return data;
+}
+
+export async function triggerCandidateScreening(
+  candidateId: string
+): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(`/api/enterprise/hr/candidates/${encodeURIComponent(candidateId)}/screen`, {
+    method: 'POST',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to screen candidate');
+  return data;
+}
+
+// 5. PROCUREMENT
+export async function createProcurementRequisition(payload: {
+  title: string;
+  department: string;
+  targetBudgetUsd: number;
+  deliveryDeadline: string;
+  vendorBids: Array<{
+    vendorName: string;
+    quoteAmountUsd: number;
+    deliveryDays: number;
+    slaGuaranteePercent: number;
+    reliabilityScore: number;
+  }>;
+}): Promise<{ procurement: ProcurementRequisition; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch('/api/enterprise/procurement/requisitions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to add requisition');
+  return data;
+}
+
+export async function deleteProcurementRequisition(
+  procurementId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(`/api/enterprise/procurement/requisitions/${encodeURIComponent(procurementId)}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete requisition');
+  return data;
+}
+
+export async function triggerProcurementEvaluation(
+  procurementId: string
+): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(
+    `/api/enterprise/procurement/requisitions/${encodeURIComponent(procurementId)}/evaluate`,
+    { method: 'POST' }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to evaluate procurement RFP');
+  return data;
+}
+
+// APPROVALS
 export async function decideApprovalItem(
   approvalId: string,
   decision: 'approved' | 'rejected',

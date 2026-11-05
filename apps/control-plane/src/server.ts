@@ -204,6 +204,13 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (method === 'POST' && pathname === '/api/enterprise/clear') {
+      const fresh = await enterpriseStore.clearAllData();
+      sendJson(res, 200, fresh);
+      return;
+    }
+
+    // --- SALES OPS ---
     if (method === 'POST' && pathname === '/api/enterprise/sales/leads') {
       const body = JSON.parse((await readBody(req)) || '{}') as {
         company: string;
@@ -223,6 +230,13 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const salesDeleteMatch = pathname.match(/^\/api\/enterprise\/sales\/leads\/([a-zA-Z0-9_-]+)$/);
+    if (method === 'DELETE' && salesDeleteMatch) {
+      await enterpriseStore.deleteLead(salesDeleteMatch[1]);
+      sendJson(res, 200, { ok: true, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
     const salesQualifyMatch = pathname.match(/^\/api\/enterprise\/sales\/leads\/([a-zA-Z0-9_-]+)\/qualify$/);
     if (method === 'POST' && salesQualifyMatch) {
       const mission = await enterpriseWorkflows.launchSalesLeadQualification(salesQualifyMatch[1]);
@@ -230,6 +244,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // --- FINANCE OPS ---
     if (method === 'POST' && pathname === '/api/enterprise/finance/invoices') {
       const body = JSON.parse((await readBody(req)) || '{}') as {
         invoiceNumber: string;
@@ -251,20 +266,29 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const financeDeleteMatch = pathname.match(/^\/api\/enterprise\/finance\/invoices\/([a-zA-Z0-9_-]+)$/);
+    if (method === 'DELETE' && financeDeleteMatch) {
+      await enterpriseStore.deleteInvoice(financeDeleteMatch[1]);
+      sendJson(res, 200, { ok: true, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
     if (method === 'POST' && pathname === '/api/enterprise/finance/reconcile') {
       const mission = await enterpriseWorkflows.launchFinanceReconciliation();
       sendJson(res, 201, { mission, overview: enterpriseStore.getOverview() });
       return;
     }
 
+    // --- CUSTOMER SUPPORT OPS ---
     if (method === 'POST' && pathname === '/api/enterprise/support/tickets') {
       const body = JSON.parse((await readBody(req)) || '{}') as {
         customerName: string;
         customerTier: 'Enterprise' | 'Growth';
         subject: string;
-        category: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security';
+        category?: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security' | 'Performance & Scale' | 'General Operations';
         priority: 'P1' | 'P2' | 'P3';
         requestedCreditUsd?: number;
+        diagnosticPayload?: Record<string, unknown>;
       };
       if (!body.customerName || !body.subject) {
         sendJson(res, 400, { error: 'customerName and subject are required' });
@@ -275,9 +299,89 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    const supportDeleteMatch = pathname.match(/^\/api\/enterprise\/support\/tickets\/([a-zA-Z0-9_-]+)$/);
+    if (method === 'DELETE' && supportDeleteMatch) {
+      await enterpriseStore.deleteTicket(supportDeleteMatch[1]);
+      sendJson(res, 200, { ok: true, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
     const supportInvestigateMatch = pathname.match(/^\/api\/enterprise\/support\/tickets\/([a-zA-Z0-9_-]+)\/investigate$/);
     if (method === 'POST' && supportInvestigateMatch) {
       const mission = await enterpriseWorkflows.launchSupportInvestigation(supportInvestigateMatch[1]);
+      sendJson(res, 201, { mission, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
+    // --- HR & RECRUITMENT OPS ---
+    if (method === 'POST' && pathname === '/api/enterprise/hr/candidates') {
+      const body = JSON.parse((await readBody(req)) || '{}') as {
+        candidateName: string;
+        email: string;
+        appliedRole: string;
+        experienceYears: number;
+        techStack: string[];
+        desiredSalaryUsd: number;
+        resumeSummary: string;
+        portfolioUrl?: string;
+      };
+      if (!body.candidateName || !body.appliedRole) {
+        sendJson(res, 400, { error: 'candidateName and appliedRole are required' });
+        return;
+      }
+      const candidate = await enterpriseStore.addCandidate(body);
+      sendJson(res, 201, { candidate, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
+    const hrDeleteMatch = pathname.match(/^\/api\/enterprise\/hr\/candidates\/([a-zA-Z0-9_-]+)$/);
+    if (method === 'DELETE' && hrDeleteMatch) {
+      await enterpriseStore.deleteCandidate(hrDeleteMatch[1]);
+      sendJson(res, 200, { ok: true, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
+    const hrScreenMatch = pathname.match(/^\/api\/enterprise\/hr\/candidates\/([a-zA-Z0-9_-]+)\/screen$/);
+    if (method === 'POST' && hrScreenMatch) {
+      const mission = await enterpriseWorkflows.launchCandidateScreening(hrScreenMatch[1]);
+      sendJson(res, 201, { mission, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
+    // --- PROCUREMENT OPS ---
+    if (method === 'POST' && pathname === '/api/enterprise/procurement/requisitions') {
+      const body = JSON.parse((await readBody(req)) || '{}') as {
+        title: string;
+        department: string;
+        targetBudgetUsd: number;
+        deliveryDeadline: string;
+        vendorBids: Array<{
+          vendorName: string;
+          quoteAmountUsd: number;
+          deliveryDays: number;
+          slaGuaranteePercent: number;
+          reliabilityScore: number;
+        }>;
+      };
+      if (!body.title) {
+        sendJson(res, 400, { error: 'title is required' });
+        return;
+      }
+      const procurement = await enterpriseStore.addProcurement(body);
+      sendJson(res, 201, { procurement, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
+    const procurementDeleteMatch = pathname.match(/^\/api\/enterprise\/procurement\/requisitions\/([a-zA-Z0-9_-]+)$/);
+    if (method === 'DELETE' && procurementDeleteMatch) {
+      await enterpriseStore.deleteProcurement(procurementDeleteMatch[1]);
+      sendJson(res, 200, { ok: true, overview: enterpriseStore.getOverview() });
+      return;
+    }
+
+    const procurementEvaluateMatch = pathname.match(/^\/api\/enterprise\/procurement\/requisitions\/([a-zA-Z0-9_-]+)\/evaluate$/);
+    if (method === 'POST' && procurementEvaluateMatch) {
+      const mission = await enterpriseWorkflows.launchProcurementEvaluation(procurementEvaluateMatch[1]);
       sendJson(res, 201, { mission, overview: enterpriseStore.getOverview() });
       return;
     }
