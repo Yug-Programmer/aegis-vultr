@@ -129,7 +129,7 @@ except Exception as e:
     const pathPolicyEval = policyEngine.evaluateFilePath('write_sandbox_file', '../../.env');
     const fsEscapeScript = `
 results = []
-for target in ["../../.env", "/etc/shadow", "C:\\\\Users\\\\Public\\\\escape_test.txt"]:
+for target in ["../../.env", "/etc/shadow", "/root/.bashrc"]:
     try:
         with open(target, "w") as f:
             f.write("escape")
