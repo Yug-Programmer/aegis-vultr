@@ -12,7 +12,7 @@ import {
 import { DEFAULT_CONTAINMENT_POLICY, PolicyEngine } from './policyEngine.js';
 import type { SandboxClient } from './sandboxClient.js';
 import type { LlmClient, LlmMessage, LlmToolDefinition } from './llmClient.js';
-import { runAutonomousPlaybook } from './autonomousPlaybooks.js';
+import { runAutonomousPlaybook, MISSION_TEMPLATES } from './autonomousPlaybooks.js';
 
 type EventSubscriber = (event: MissionEvent) => void;
 
@@ -216,6 +216,20 @@ export class AgentOrchestrator {
     customRunner?: (ctx: import('./autonomousPlaybooks.js').PlaybookContext, mission: MissionRecord) => Promise<string>;
   }): Promise<MissionRecord> {
     const id = `msn_${crypto.randomBytes(6).toString('hex')}`;
+    let templateId = opts.templateId;
+    if (!templateId) {
+      const lower = opts.prompt.toLowerCase();
+      if (lower.includes('news.ycombinator.com') || lower.includes('hacker news')) {
+        templateId = 'hn-intel';
+      } else if (lower.includes('rate limiter') || lower.includes('sliding-window')) {
+        templateId = 'self-heal-bench';
+      } else if (lower.includes('security header') || lower.includes('wikipedia.org')) {
+        templateId = 'security-posture';
+      } else if (lower.includes('monte carlo') || lower.includes('var') || lower.includes('cvar')) {
+        templateId = 'quant-sim';
+      }
+    }
+
     const policy: ContainmentPolicy = {
       ...DEFAULT_CONTAINMENT_POLICY,
       ...opts.policyOverrides,
@@ -225,7 +239,7 @@ export class AgentOrchestrator {
     const mission: MissionRecord = {
       id,
       prompt: opts.prompt,
-      templateId: opts.templateId,
+      templateId,
       status: 'planning',
       createdAt: new Date().toISOString(),
       llmProviderUsed: llmStatus.activeMode,
@@ -486,6 +500,8 @@ export class AgentOrchestrator {
 
       if (customRunner) {
         summaryMarkdown = await customRunner(playbookCtx, mission);
+      } else if (mission.templateId && MISSION_TEMPLATES.some((t) => t.id === mission.templateId)) {
+        summaryMarkdown = await runAutonomousPlaybook(playbookCtx);
       } else if (activeEndpoint) {
         try {
           summaryMarkdown = await this.runLiveLlmToolLoop({
@@ -550,13 +566,15 @@ export class AgentOrchestrator {
     const messages: LlmMessage[] = [
       {
         role: 'system',
-        content: `You are AEGIS // VULTR, a containment-first autonomous engineering and web-operator agent running on a centralized Control Plane that dispatches every action into an isolated Vultr sandbox.
+        content: `You are AEGIS // VULTR, an autonomous code & browser execution agent running on a centralized Control Plane that dispatches every action into an isolated Vultr sandbox.
 Rules:
-1. ALWAYS call set_execution_plan FIRST with 3-5 concrete, verifiable steps.
-2. Perform REAL work inside the sandbox: write & run Python 3 (standard library only: json, csv, math, statistics, hashlib, unittest, html, urllib, collections) or JavaScript code, and operate the real Headless Chromium browser (browser_navigate, browser_extract_js) when URLs or live web tasks are involved.
-3. Generate visual artifacts inside /workspace whenever helpful (such as clean dark-themed .svg charts, .csv datasets, .html or .md reports).
-4. Update plan steps via update_plan_step as you progress. If run_sandbox_code exits non-zero, diagnose stderr, fix the script, and re-run!
-5. Call complete_mission at the end with a concise markdown summary grounded strictly in real executed outputs.`,
+1. On your very first turn, call set_execution_plan ONCE with 3-5 concrete steps.
+2. In subsequent turns, do NOT call set_execution_plan again! Execute the planned steps using real sandbox tools:
+   - run_sandbox_code: write & run Python 3 (standard library: json, csv, math, statistics, urllib, hashlib) or Node.js.
+   - browser_navigate: navigate Headless Chromium to URLs and capture DOM/screenshots.
+   - browser_extract_js: extract JSON data from the active browser DOM.
+3. Update plan steps via update_plan_step as you execute.
+4. When finished, call complete_mission with summaryMarkdown.`,
       },
       {
         role: 'user',
@@ -623,7 +641,11 @@ Rules:
               status: 'pending',
             }));
             ctx.setPlan(steps);
-            toolResult = { status: 'plan_set', stepCount: steps.length };
+            toolResult = {
+              status: 'plan_set',
+              stepCount: steps.length,
+              instruction: 'Plan is now initialized. Immediately proceed to execute Step 1 by calling browser_navigate or run_sandbox_code. Do not call set_execution_plan again.',
+            };
           } else if (name === 'update_plan_step') {
             ctx.updateStep(
               String(args.stepId || ''),
