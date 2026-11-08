@@ -12,7 +12,7 @@
     "dev:worker": "npm --workspace=@aegis/sandbox-worker run dev",
     "dev:control": "npm --workspace=@aegis/control-plane run dev",
     "dev:web": "npm --workspace=@aegis/web run dev",
-    "build": "npm --workspace=@aegis/shared run build && npm --workspace=@aegis/sandbox-worker run build && npm --workspace=@aegis/control-plane run build && npm --workspace=@aegis/web run build",
+    "build": "npm --workspace=@aegis/shared run build && npm --workspace=@aegis/sandbox-worker run build && npm --workspace=@aegis/control-plane run build && npm --workspace=@aegis/web run build && node -e \"const fs=require('fs'); fs.cpSync('apps/web/dist', 'dist', {recursive:true});\"",
     "start": "node scripts/start-prod.mjs",
     "provision:vultr": "node deploy/vultr/provision-vultr.mjs",
     "typecheck": "npm --workspace=@aegis/shared run typecheck && npm --workspace=@aegis/sandbox-worker run typecheck && npm --workspace=@aegis/control-plane run typecheck && npm --workspace=@aegis/web run typecheck"

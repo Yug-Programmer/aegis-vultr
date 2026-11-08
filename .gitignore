@@ -6,3 +6,10 @@ dist/
 data/
 .DS_Store
 Thumbs.db
+*.mp4
+*.wav
+scratch/
+temp_slides/
+report_assets/
+AI_Error_Message_Helper_Project_Report.pdf
+

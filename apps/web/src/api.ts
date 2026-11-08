@@ -50,6 +50,13 @@ export interface SystemStatusResponse {
   templates: MissionTemplate[];
 }
 
+export const API_BASE = (((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_URL) || '').replace(/\/+$/, '');
+
+export function apiUrl(endpoint: string): string {
+  if (!API_BASE) return endpoint;
+  return `${API_BASE}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+}
+
 export interface VultrOverviewResponse {
   vultrApiConfigured: boolean;
   inferenceModels: {
@@ -72,20 +79,20 @@ export interface VultrOverviewResponse {
 }
 
 export async function fetchSystemStatus(): Promise<SystemStatusResponse> {
-  const res = await fetch('/api/status');
+  const res = await fetch(apiUrl('/api/status'));
   if (!res.ok) throw new Error(`Status check failed: ${res.status}`);
   return (await res.json()) as SystemStatusResponse;
 }
 
 export async function fetchMissions(): Promise<MissionRecord[]> {
-  const res = await fetch('/api/missions');
+  const res = await fetch(apiUrl('/api/missions'));
   if (!res.ok) throw new Error(`Missions fetch failed: ${res.status}`);
   const data = (await res.json()) as { missions: MissionRecord[] };
   return data.missions;
 }
 
 export async function fetchMission(id: string): Promise<MissionRecord> {
-  const res = await fetch(`/api/missions/${encodeURIComponent(id)}`);
+  const res = await fetch(apiUrl(`/api/missions/${encodeURIComponent(id)}`));
   if (!res.ok) throw new Error(`Mission fetch failed: ${res.status}`);
   const data = (await res.json()) as { mission: MissionRecord };
   return data.mission;
@@ -96,7 +103,7 @@ export async function createMission(opts: {
   templateId?: string;
   policy?: Partial<ContainmentPolicy>;
 }): Promise<MissionRecord> {
-  const res = await fetch('/api/missions', {
+  const res = await fetch(apiUrl('/api/missions'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(opts),
@@ -107,20 +114,20 @@ export async function createMission(opts: {
 }
 
 export async function verifyMission(id: string): Promise<ChainVerificationResult> {
-  const res = await fetch(`/api/missions/${encodeURIComponent(id)}/verify`);
+  const res = await fetch(apiUrl(`/api/missions/${encodeURIComponent(id)}/verify`));
   if (!res.ok) throw new Error(`Verification failed: ${res.status}`);
   return (await res.json()) as ChainVerificationResult;
 }
 
 export async function runContainmentAudit(): Promise<ContainmentAuditReport> {
-  const res = await fetch('/api/containment/audit', { method: 'POST' });
+  const res = await fetch(apiUrl('/api/containment/audit'), { method: 'POST' });
   if (!res.ok) throw new Error(`Audit failed: ${res.status}`);
   const data = (await res.json()) as { report: ContainmentAuditReport };
   return data.report;
 }
 
 export async function fetchVultrOverview(): Promise<VultrOverviewResponse> {
-  const res = await fetch('/api/vultr/overview');
+  const res = await fetch(apiUrl('/api/vultr/overview'));
   if (!res.ok) throw new Error(`Vultr overview failed: ${res.status}`);
   return (await res.json()) as VultrOverviewResponse;
 }
@@ -130,7 +137,7 @@ export function subscribeToMissionEvents(
   onEvent: (event: MissionEvent) => void,
   onError?: (err: unknown) => void
 ): () => void {
-  const es = new EventSource(`/api/missions/${encodeURIComponent(missionId)}/stream`);
+  const es = new EventSource(apiUrl(`/api/missions/${encodeURIComponent(missionId)}/stream`));
   es.onmessage = (msg) => {
     try {
       const parsed = JSON.parse(msg.data) as MissionEvent;
@@ -148,18 +155,18 @@ export function subscribeToMissionEvents(
 }
 
 export async function verifyMissionReceipts(id: string): Promise<ChainVerificationResult> {
-  const res = await fetch(`/api/missions/${encodeURIComponent(id)}/verify`);
+  const res = await fetch(apiUrl(`/api/missions/${encodeURIComponent(id)}/verify`));
   if (!res.ok) throw new Error('Receipt chain verification request failed');
   return (await res.json()) as ChainVerificationResult;
 }
 
 export function getArtifactUrl(missionId: string, relativePath: string, download = false): string {
   const dl = download ? '&download=1' : '';
-  return `/api/missions/${encodeURIComponent(missionId)}/artifact?path=${encodeURIComponent(relativePath)}${dl}`;
+  return apiUrl(`/api/missions/${encodeURIComponent(missionId)}/artifact?path=${encodeURIComponent(relativePath)}${dl}`);
 }
 
 export async function saveRuntimeSettings(payload: Record<string, unknown>): Promise<void> {
-  const res = await fetch('/api/settings', {
+  const res = await fetch(apiUrl('/api/settings'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -175,7 +182,7 @@ export async function provisionVultrSandboxNode(payload: {
   plan: string;
   label?: string;
 }) {
-  const res = await fetch('/api/vultr/provision', {
+  const res = await fetch(apiUrl('/api/vultr/provision'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -188,7 +195,7 @@ export async function provisionVultrSandboxNode(payload: {
 }
 
 export function getArtifactDownloadUrl(missionId: string, filename: string): string {
-  return `/api/missions/${encodeURIComponent(missionId)}/artifacts/${encodeURIComponent(filename)}`;
+  return apiUrl(`/api/missions/${encodeURIComponent(missionId)}/artifacts/${encodeURIComponent(filename)}`);
 }
 
 // ==========================================
@@ -196,20 +203,20 @@ export function getArtifactDownloadUrl(missionId: string, filename: string): str
 // ==========================================
 
 export async function fetchEnterpriseOverview(): Promise<EnterpriseOverviewPayload> {
-  const res = await fetch('/api/enterprise/overview');
+  const res = await fetch(apiUrl('/api/enterprise/overview'));
   if (!res.ok) throw new Error(`Enterprise overview failed: ${res.status}`);
   const data = (await res.json()) as { overview: EnterpriseOverviewPayload };
   return data.overview;
 }
 
 export async function resetEnterpriseDataset(): Promise<EnterpriseOverviewPayload> {
-  const res = await fetch('/api/enterprise/reset', { method: 'POST' });
+  const res = await fetch(apiUrl('/api/enterprise/reset'), { method: 'POST' });
   const data = (await res.json()) as EnterpriseOverviewPayload;
   return data;
 }
 
 export async function clearEnterpriseDataset(): Promise<EnterpriseOverviewPayload> {
-  const res = await fetch('/api/enterprise/clear', { method: 'POST' });
+  const res = await fetch(apiUrl('/api/enterprise/clear'), { method: 'POST' });
   const data = (await res.json()) as EnterpriseOverviewPayload;
   return data;
 }
@@ -224,7 +231,7 @@ export async function createSalesLead(payload: {
   estimatedArrUsd: number;
   industry: string;
 }): Promise<{ lead: SalesLead; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch('/api/enterprise/sales/leads', {
+  const res = await fetch(apiUrl('/api/enterprise/sales/leads'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -237,7 +244,7 @@ export async function createSalesLead(payload: {
 export async function deleteSalesLead(
   leadId: string
 ): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}`, {
+  const res = await fetch(apiUrl(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}`), {
     method: 'DELETE',
   });
   const data = await res.json();
@@ -248,7 +255,7 @@ export async function deleteSalesLead(
 export async function triggerSalesLeadQualification(
   leadId: string
 ): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}/qualify`, {
+  const res = await fetch(apiUrl(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}/qualify`), {
     method: 'POST',
   });
   const data = await res.json();
@@ -268,7 +275,7 @@ export async function createFinanceInvoice(payload: {
   ibanLast4: string;
   expectedIbanLast4: string;
 }): Promise<{ invoice: FinanceInvoice; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch('/api/enterprise/finance/invoices', {
+  const res = await fetch(apiUrl('/api/enterprise/finance/invoices'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -281,7 +288,7 @@ export async function createFinanceInvoice(payload: {
 export async function deleteFinanceInvoice(
   invoiceId: string
 ): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/finance/invoices/${encodeURIComponent(invoiceId)}`, {
+  const res = await fetch(apiUrl(`/api/enterprise/finance/invoices/${encodeURIComponent(invoiceId)}`), {
     method: 'DELETE',
   });
   const data = await res.json();
@@ -293,7 +300,7 @@ export async function triggerFinanceReconciliation(): Promise<{
   mission: MissionRecord;
   overview: EnterpriseOverviewPayload;
 }> {
-  const res = await fetch('/api/enterprise/finance/reconcile', { method: 'POST' });
+  const res = await fetch(apiUrl('/api/enterprise/finance/reconcile'), { method: 'POST' });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to launch reconciliation');
   return data;
@@ -309,7 +316,7 @@ export async function createSupportTicket(payload: {
   requestedCreditUsd?: number;
   diagnosticPayload?: Record<string, unknown>;
 }): Promise<{ ticket: SupportTicket; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch('/api/enterprise/support/tickets', {
+  const res = await fetch(apiUrl('/api/enterprise/support/tickets'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -322,7 +329,7 @@ export async function createSupportTicket(payload: {
 export async function deleteSupportTicket(
   ticketId: string
 ): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/support/tickets/${encodeURIComponent(ticketId)}`, {
+  const res = await fetch(apiUrl(`/api/enterprise/support/tickets/${encodeURIComponent(ticketId)}`), {
     method: 'DELETE',
   });
   const data = await res.json();
@@ -334,7 +341,7 @@ export async function triggerSupportInvestigation(
   ticketId: string
 ): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
   const res = await fetch(
-    `/api/enterprise/support/tickets/${encodeURIComponent(ticketId)}/investigate`,
+    apiUrl(`/api/enterprise/support/tickets/${encodeURIComponent(ticketId)}/investigate`),
     { method: 'POST' }
   );
   const data = await res.json();
@@ -353,7 +360,7 @@ export async function createHrCandidate(payload: {
   resumeSummary: string;
   portfolioUrl?: string;
 }): Promise<{ candidate: HrCandidate; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch('/api/enterprise/hr/candidates', {
+  const res = await fetch(apiUrl('/api/enterprise/hr/candidates'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -366,7 +373,7 @@ export async function createHrCandidate(payload: {
 export async function deleteHrCandidate(
   candidateId: string
 ): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/hr/candidates/${encodeURIComponent(candidateId)}`, {
+  const res = await fetch(apiUrl(`/api/enterprise/hr/candidates/${encodeURIComponent(candidateId)}`), {
     method: 'DELETE',
   });
   const data = await res.json();
@@ -377,7 +384,7 @@ export async function deleteHrCandidate(
 export async function triggerCandidateScreening(
   candidateId: string
 ): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/hr/candidates/${encodeURIComponent(candidateId)}/screen`, {
+  const res = await fetch(apiUrl(`/api/enterprise/hr/candidates/${encodeURIComponent(candidateId)}/screen`), {
     method: 'POST',
   });
   const data = await res.json();
@@ -399,7 +406,7 @@ export async function createProcurementRequisition(payload: {
     reliabilityScore: number;
   }>;
 }): Promise<{ procurement: ProcurementRequisition; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch('/api/enterprise/procurement/requisitions', {
+  const res = await fetch(apiUrl('/api/enterprise/procurement/requisitions'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -412,7 +419,7 @@ export async function createProcurementRequisition(payload: {
 export async function deleteProcurementRequisition(
   procurementId: string
 ): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(`/api/enterprise/procurement/requisitions/${encodeURIComponent(procurementId)}`, {
+  const res = await fetch(apiUrl(`/api/enterprise/procurement/requisitions/${encodeURIComponent(procurementId)}`), {
     method: 'DELETE',
   });
   const data = await res.json();
@@ -424,7 +431,7 @@ export async function triggerProcurementEvaluation(
   procurementId: string
 ): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
   const res = await fetch(
-    `/api/enterprise/procurement/requisitions/${encodeURIComponent(procurementId)}/evaluate`,
+    apiUrl(`/api/enterprise/procurement/requisitions/${encodeURIComponent(procurementId)}/evaluate`),
     { method: 'POST' }
   );
   const data = await res.json();
@@ -439,7 +446,7 @@ export async function decideApprovalItem(
   reviewerNote?: string
 ): Promise<{ approval: ApprovalItem; overview: EnterpriseOverviewPayload }> {
   const res = await fetch(
-    `/api/enterprise/approvals/${encodeURIComponent(approvalId)}/decide`,
+    apiUrl(`/api/enterprise/approvals/${encodeURIComponent(approvalId)}/decide`),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
