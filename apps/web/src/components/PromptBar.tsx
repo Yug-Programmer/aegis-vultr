@@ -260,6 +260,12 @@ export const PromptBar: React.FC<PromptBarProps> = ({
   const [draft, setDraft] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
   const [modelKey, setModelKey] = useState(defaultModel);
+
+  useEffect(() => {
+    if (defaultModel) {
+      setModelKey(defaultModel);
+    }
+  }, [defaultModel]);
   const [plusOpen, setPlusOpen] = useState(false);
   const [modelOpen, setModelOpen] = useState(false);
   const [effortOpen, setEffortOpen] = useState(false);

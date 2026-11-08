@@ -355,6 +355,7 @@ export function App() {
           {workspaceTab === 'chat' && (
             <AgentChatView
               networkMode={networkMode}
+              status={status}
               onNavigateToStudio={() => setWorkspaceTab('studio')}
               onSelectMission={(msn) => {
                 setActiveMission(msn);

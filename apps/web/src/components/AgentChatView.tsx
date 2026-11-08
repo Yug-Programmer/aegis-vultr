@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Sparkles,
   Bot,
@@ -44,6 +44,7 @@ import {
   fetchMission,
   getArtifactUrl,
   subscribeToMissionEvents,
+  type SystemStatusResponse,
 } from '../api';
 import ThoughtLine from './ThoughtLine';
 import PromptBar, {
@@ -68,6 +69,7 @@ export interface ChatMessage {
 
 interface AgentChatViewProps {
   networkMode: NetworkPolicyMode;
+  status?: SystemStatusResponse | null;
   onNavigateToStudio?: () => void;
   onSelectMission?: (mission: MissionRecord) => void;
 }
@@ -96,9 +98,7 @@ const CHAT_COMMANDS: PromptBarCommand[] = [
 ];
 
 const CHAT_MODELS: PromptBarModel[] = [
-  { key: 'vultr', name: 'Vultr Kimi-K2', tag: 'Serverless' },
   { key: 'gemini', name: 'Gemini 2.5 Flash', tag: 'Fast' },
-  { key: 'openai', name: 'GPT-4o', tag: 'Flagship' },
   { key: 'playbook', name: 'Autonomous Engine', tag: 'Airgapped' },
 ];
 
@@ -210,6 +210,7 @@ function AegisLogo({ className = 'w-6 h-6' }: { className?: string }) {
 
 export function AgentChatView({
   networkMode,
+  status,
   onNavigateToStudio,
   onSelectMission,
 }: AgentChatViewProps) {
@@ -221,6 +222,24 @@ export function AgentChatView({
   const [activeMissionRecord, setActiveMissionRecord] = useState<MissionRecord | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeUnsubRef = useRef<(() => void) | null>(null);
+
+  const availableModels = useMemo<PromptBarModel[]>(() => {
+    const list: PromptBarModel[] = [];
+    if (status?.llm.vultrInferenceConfigured) {
+      list.push({ key: 'vultr', name: 'Vultr Kimi-K2', tag: 'Serverless' });
+    }
+    list.push({ key: 'gemini', name: 'Gemini 2.5 Flash', tag: 'Fast' });
+    if (status?.llm.openaiConfigured) {
+      list.push({ key: 'openai', name: 'GPT-4o', tag: 'Flagship' });
+    }
+    list.push({ key: 'playbook', name: 'Autonomous Engine', tag: 'Airgapped' });
+    return list;
+  }, [status]);
+
+  const defaultModelKey = useMemo(() => {
+    if (status?.llm.vultrInferenceConfigured) return 'vultr';
+    return 'gemini';
+  }, [status]);
 
   useEffect(() => {
     return () => {
@@ -580,8 +599,8 @@ export function AgentChatView({
               placeholder="Ask AEGIS to plan, browse, code, or execute tools in isolated sandbox…"
               sources={CHAT_SOURCES}
               commands={CHAT_COMMANDS}
-              models={CHAT_MODELS}
-              defaultModel="vultr"
+              models={availableModels}
+              defaultModel={defaultModelKey}
               efforts={['Low', 'Medium', 'High', 'Extra', 'Max']}
               defaultEffort="High"
               busy={busy}
