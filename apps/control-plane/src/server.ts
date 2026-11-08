@@ -426,10 +426,105 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (method === 'POST' && pathname === '/api/sandbox/exec') {
+      const body = JSON.parse((await readBody(req)) || '{}') as {
+        code: string;
+        language?: 'python' | 'javascript';
+        filename?: string;
+        sandboxId?: string;
+      };
+      const lang = body.language || 'python';
+      const filename = body.filename || (lang === 'python' ? 'script.py' : 'script.js');
+      const code = body.code || '';
+
+      let sandboxId = body.sandboxId;
+      if (!sandboxId) {
+        const created = await sandboxClient.createSandbox();
+        sandboxId = created.sandboxId;
+      }
+
+      const execRes = await sandboxClient.execCode(sandboxId, {
+        language: lang,
+        code,
+        filename,
+        timeoutMs: 30000,
+        networkMode: 'standard',
+        missionId: 'interactive_run',
+        stepIndex: 1,
+        policyRuleId: 'POL-USER-EXEC',
+        prevReceiptHash: '0'.repeat(64),
+      });
+
+      sendJson(res, 200, {
+        stdout: execRes.stdout,
+        stderr: execRes.stderr,
+        exitCode: execRes.exitCode,
+        durationMs: execRes.durationMs,
+        receipt: execRes.receipt,
+        artifacts: execRes.artifacts,
+        sandboxId,
+      });
+      return;
+    }
+
     const msnMatch = pathname.match(/^\/api\/missions\/([a-zA-Z0-9_-]+)(?:\/(.*))?$/);
     if (msnMatch) {
       const missionId = msnMatch[1];
       const sub = msnMatch[2] || '';
+
+      if (method === 'POST' && sub === 'exec') {
+        const body = JSON.parse((await readBody(req)) || '{}') as {
+          code: string;
+          language?: 'python' | 'javascript';
+          filename?: string;
+        };
+        const lang = body.language || 'python';
+        const filename = body.filename || (lang === 'python' ? 'script.py' : 'script.js');
+        const code = body.code || '';
+
+        const mission = orchestrator.getMission(missionId);
+        let sandboxId = mission?.sandboxId;
+        if (!sandboxId) {
+          const created = await sandboxClient.createSandbox();
+          sandboxId = created.sandboxId;
+          if (mission) mission.sandboxId = sandboxId;
+        }
+
+        const prevHash =
+          mission?.receipts[mission.receipts.length - 1]?.receiptHash || '0'.repeat(64);
+        const execRes = await sandboxClient.execCode(sandboxId, {
+          language: lang,
+          code,
+          filename,
+          timeoutMs: 30000,
+          networkMode: mission?.policy.networkMode || 'standard',
+          missionId: missionId,
+          stepIndex: (mission?.receipts.length || 0) + 1,
+          policyRuleId: 'POL-USER-EXEC',
+          prevReceiptHash: prevHash,
+        });
+
+        if (mission) {
+          mission.receipts.push(execRes.receipt);
+          for (const art of execRes.artifacts) {
+            if (!mission.artifacts.some((a) => a.relativePath === art.relativePath)) {
+              mission.artifacts.push(art);
+            }
+          }
+        }
+
+        sendJson(res, 200, {
+          stdout: execRes.stdout,
+          stderr: execRes.stderr,
+          exitCode: execRes.exitCode,
+          durationMs: execRes.durationMs,
+          receipt: execRes.receipt,
+          artifacts: mission?.artifacts || execRes.artifacts,
+          sandboxId,
+        });
+        return;
+      }
+
       const mission = orchestrator.getMission(missionId);
       if (!mission) {
         sendJson(res, 404, { error: 'Mission not found' });
@@ -486,8 +581,15 @@ const server = http.createServer(async (req, res) => {
           relPath
         );
         const download = urlObj.searchParams.get('download') === '1';
+        let resolvedMime = mimeType;
+        if (relPath.endsWith('.pdf')) resolvedMime = 'application/pdf';
+        else if (relPath.endsWith('.svg')) resolvedMime = 'image/svg+xml';
+        else if (relPath.endsWith('.png')) resolvedMime = 'image/png';
+        else if (relPath.endsWith('.json')) resolvedMime = 'application/json';
+        else if (relPath.endsWith('.csv')) resolvedMime = 'text/csv';
+
         const headers: Record<string, string | number> = {
-          'Content-Type': mimeType,
+          'Content-Type': resolvedMime,
           'Content-Length': buffer.length,
           'Access-Control-Allow-Origin': '*',
         };

@@ -33,12 +33,12 @@ export function MissionComposer({
   };
 
   return (
-    <div className="p-4 border-b border-[#242830] space-y-4 shrink-0 overflow-y-auto max-h-[50vh]">
+    <div className="p-4 border-b border-[#2E2E2E] space-y-4 shrink-0 overflow-y-auto max-h-[50vh] bg-[#1D1D1D]">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-semibold uppercase tracking-wider text-[#9CA3AF]">
+        <span className="font-semibold uppercase tracking-wider text-[#777777]">
           Mission Dispatch
         </span>
-        <span className="text-[11px] font-mono text-[#6B7280]">RPC: HMAC-SHA256</span>
+        <span className="text-[11px] font-mono text-[#444444]">RPC: HMAC-SHA256</span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -50,13 +50,13 @@ export function MissionComposer({
           }}
           rows={4}
           placeholder="Describe an engineering, data analysis, or web audit mission to execute inside the Vultr sandbox..."
-          className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] p-3 text-xs text-[#F4F4F5] placeholder:text-[#6B7280] resize-none leading-relaxed outline-none"
+          className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] p-3 text-xs text-[#F2F2F2] placeholder:text-[#555555] resize-none leading-relaxed outline-none"
         />
 
         <button
           type="submit"
           disabled={isRunning || !prompt.trim()}
-          className="w-full py-2 px-3 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] disabled:opacity-50 text-[#0B0D10] font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
+          className="w-full py-2 px-3 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] disabled:opacity-40 text-[#191919] font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition"
         >
           {isRunning ? (
             <>
@@ -74,7 +74,7 @@ export function MissionComposer({
 
       {/* Verified Multi-Step Workflows Library */}
       <div className="space-y-2 pt-1">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-[#6B7280]">
+        <div className="text-[11px] font-medium uppercase tracking-wider text-[#444444]">
           Verified Flagship Workflows
         </div>
         <div className="space-y-1.5">
@@ -86,8 +86,8 @@ export function MissionComposer({
                 key={tpl.id}
                 className={`rounded-md p-2.5 border transition cursor-pointer ${
                   active
-                    ? 'bg-[#15181E] border-[#38BDF8]/40'
-                    : 'bg-[#111419] hover:bg-[#15181E] border-[#242830]'
+                    ? 'bg-[#242424] border-[#38BDF8]/30'
+                    : 'bg-[#191919] hover:bg-[#242424] border-[#2E2E2E]'
                 }`}
                 onClick={() => {
                   setPrompt(tpl.prompt);
@@ -97,7 +97,7 @@ export function MissionComposer({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <Icon className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
-                    <span className="text-xs font-medium text-[#F4F4F5] truncate">
+                    <span className="text-xs font-medium text-[#D0D0D0] truncate">
                       {tpl.title}
                     </span>
                   </div>
@@ -110,12 +110,12 @@ export function MissionComposer({
                       setSelectedTemplateId(tpl.id);
                       void onLaunchMission(tpl.prompt, tpl.id);
                     }}
-                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#15181E] hover:bg-[#38BDF8] hover:text-[#0B0D10] text-[#38BDF8] border border-[#242830] shrink-0 cursor-pointer transition disabled:opacity-40"
+                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#242424] hover:bg-[#38BDF8] hover:text-[#191919] text-[#38BDF8] border border-[#2E2E2E] shrink-0 cursor-pointer transition disabled:opacity-40"
                   >
                     Run
                   </button>
                 </div>
-                <p className="text-[11px] text-[#9CA3AF] mt-1 leading-snug">
+                <p className="text-[11px] text-[#777777] mt-1 leading-snug">
                   {tpl.description}
                 </p>
               </div>

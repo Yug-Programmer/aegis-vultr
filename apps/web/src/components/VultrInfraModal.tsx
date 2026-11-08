@@ -98,24 +98,24 @@ export function VultrInfraModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0B0D10]/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl rounded-lg border border-[#242830] bg-[#111419] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-[#191919]/80 flex items-center justify-center p-4">
+      <div className="w-full max-w-3xl rounded-lg border border-[#2E2E2E] bg-[#1D1D1D] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="px-5 py-3.5 bg-[#0D0F12] border-b border-[#242830] flex items-center justify-between">
+        <div className="px-5 py-3.5 bg-[#242424] border-b border-[#2E2E2E] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Cloud className="w-4 h-4 text-[#38BDF8]" />
             <div>
-              <h3 className="text-sm font-semibold text-[#F4F4F5]">
+              <h3 className="text-sm font-semibold text-[#F2F2F2]">
                 Vultr Cloud Infrastructure &amp; Runtime Settings
               </h3>
-              <p className="text-[11px] text-[#9CA3AF]">
+              <p className="text-[11px] text-[#888888]">
                 Configure serverless inference models, cloud compute VM nodes, and RPC worker endpoints
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-[#15181E] text-[#9CA3AF] hover:text-[#F4F4F5] cursor-pointer transition"
+            className="p-1 rounded hover:bg-[#2A2A2A] text-[#777777] hover:text-[#D0D0D0] cursor-pointer transition"
           >
             <X className="w-4 h-4" />
           </button>
@@ -124,9 +124,9 @@ export function VultrInfraModal({
         {/* Modal Body */}
         <div className="p-5 overflow-y-auto space-y-5">
           {/* Form */}
-          <form onSubmit={handleSave} className="space-y-4 rounded-md border border-[#242830] bg-[#0D0F12] p-4">
+          <form onSubmit={handleSave} className="space-y-4 rounded-md border border-[#2E2E2E] bg-[#242424] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#F4F4F5] flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-[#F2F2F2] flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5 text-[#38BDF8]" />
                 Inference &amp; Sandbox RPC Settings
               </span>
@@ -137,13 +137,13 @@ export function VultrInfraModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block text-[11px] text-[#9CA3AF] mb-1">
+                <label className="block text-[11px] text-[#777777] mb-1">
                   Planner Engine Mode
                 </label>
                 <select
                   value={preferredProvider}
                   onChange={(e) => setPreferredProvider(e.target.value)}
-                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-1.5 text-[#F4F4F5] outline-none"
+                  className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-3 py-1.5 text-[#F2F2F2] outline-none"
                 >
                   <option value="auto">Auto (Vultr Inference → Gemini → OpenAI → Playbook)</option>
                   <option value="vultr">Vultr Serverless Inference (api.vultrinference.com)</option>
@@ -154,7 +154,7 @@ export function VultrInfraModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#9CA3AF] mb-1">
+                <label className="block text-[11px] text-[#777777] mb-1">
                   Vultr Serverless Inference Model
                 </label>
                 <input
@@ -162,7 +162,7 @@ export function VultrInfraModal({
                   list="vultr-models"
                   value={vultrModel}
                   onChange={(e) => setVultrModel(e.target.value)}
-                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#F4F4F5] outline-none"
+                  className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#F2F2F2] outline-none"
                 />
                 <datalist id="vultr-models">
                   {(overview?.inferenceModels.models || ['kimi-k2-instruct']).map((m) => (
@@ -172,7 +172,7 @@ export function VultrInfraModal({
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#9CA3AF] mb-1">
+                <label className="block text-[11px] text-[#777777] mb-1">
                   VULTR_INFERENCE_API_KEY{' '}
                   {status?.llm.vultrInferenceConfigured && (
                     <span className="text-[#34D399]">(Configured ✓)</span>
@@ -183,12 +183,12 @@ export function VultrInfraModal({
                   placeholder="Enter Vultr Inference key..."
                   value={vultrInferenceKey}
                   onChange={(e) => setVultrInferenceKey(e.target.value)}
-                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#F4F4F5] outline-none"
+                  className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#F2F2F2] outline-none placeholder:text-[#555555]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#9CA3AF] mb-1">
+                <label className="block text-[11px] text-[#777777] mb-1">
                   VULTR_API_KEY (Cloud Compute v2){' '}
                   {status?.vultrCloud.configured && (
                     <span className="text-[#34D399]">(Configured ✓)</span>
@@ -199,12 +199,12 @@ export function VultrInfraModal({
                   placeholder="Enter Vultr API key for VM provisioning..."
                   value={vultrApiKey}
                   onChange={(e) => setVultrApiKey(e.target.value)}
-                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#F4F4F5] outline-none"
+                  className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#F2F2F2] outline-none placeholder:text-[#555555]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#9CA3AF] mb-1">
+                <label className="block text-[11px] text-[#777777] mb-1">
                   Optional Gemini / OpenAI API Keys
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -213,20 +213,20 @@ export function VultrInfraModal({
                     placeholder="Gemini Key"
                     value={geminiApiKey}
                     onChange={(e) => setGeminiApiKey(e.target.value)}
-                    className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-2.5 py-1.5 font-mono text-[#F4F4F5] outline-none"
+                    className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-2.5 py-1.5 font-mono text-[#F2F2F2] outline-none placeholder:text-[#555555]"
                   />
                   <input
                     type="password"
                     placeholder="OpenAI Key"
                     value={openaiApiKey}
                     onChange={(e) => setOpenaiApiKey(e.target.value)}
-                    className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-2.5 py-1.5 font-mono text-[#F4F4F5] outline-none"
+                    className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-2.5 py-1.5 font-mono text-[#F2F2F2] outline-none placeholder:text-[#555555]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#9CA3AF] mb-1">
+                <label className="block text-[11px] text-[#777777] mb-1">
                   Active Sandbox Worker RPC URL
                 </label>
                 <input
@@ -234,12 +234,12 @@ export function VultrInfraModal({
                   value={workerUrl}
                   onChange={(e) => setWorkerUrl(e.target.value)}
                   placeholder="http://127.0.0.1:4100 or http://<instance-ip>:4100"
-                  className="w-full rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#38BDF8] outline-none"
+                  className="w-full rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-3 py-1.5 font-mono text-[#38BDF8] outline-none placeholder:text-[#555555]"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#242830]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2E2E2E]">
               {savedToast && (
                 <span className="text-xs text-[#34D399] flex items-center gap-1 font-mono">
                   <Check className="w-3.5 h-3.5" /> Configuration updated
@@ -248,7 +248,7 @@ export function VultrInfraModal({
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#0B0D10] font-semibold text-xs cursor-pointer transition shadow-sm"
+                className="px-4 py-1.5 rounded-md bg-[#38BDF8] hover:bg-[#7DD3FC] text-[#191919] font-semibold text-xs cursor-pointer transition"
               >
                 {saving ? 'Saving...' : 'Apply Configuration'}
               </button>
@@ -256,20 +256,20 @@ export function VultrInfraModal({
           </form>
 
           {/* VM Provisioner */}
-          <div className="rounded-md border border-[#242830] bg-[#0D0F12] p-4 space-y-3">
+          <div className="rounded-md border border-[#2E2E2E] bg-[#242424] p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold text-[#F4F4F5] flex items-center gap-1.5">
+              <div className="text-xs font-semibold text-[#F2F2F2] flex items-center gap-1.5">
                 <Server className="w-3.5 h-3.5 text-[#34D399]" />
                 One-Click Vultr Cloud Compute Provisioner (Ubuntu 24.04 + Docker + gVisor)
               </div>
-              <span className="text-[10px] font-mono text-[#6B7280]">POST /v2/instances</span>
+              <span className="text-[10px] font-mono text-[#555555]">POST /v2/instances</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-2.5 py-1.5 text-[#F4F4F5] outline-none"
+                className="rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-2.5 py-1.5 text-[#F2F2F2] outline-none"
               >
                 <option value="ewr">ewr — New Jersey (US East)</option>
                 <option value="ord">ord — Chicago (US Central)</option>
@@ -282,7 +282,7 @@ export function VultrInfraModal({
               <select
                 value={plan}
                 onChange={(e) => setPlan(e.target.value)}
-                className="rounded-md bg-[#0B0D10] border border-[#242830] focus:border-[#38BDF8] px-2.5 py-1.5 text-[#F4F4F5] outline-none"
+                className="rounded-md bg-[#191919] border border-[#2E2E2E] focus:border-[#38BDF8] px-2.5 py-1.5 text-[#F2F2F2] outline-none"
               >
                 <option value="vc2-2c-4gb">vc2-2c-4gb (2 vCPU / 4 GB RAM)</option>
                 <option value="vc2-4c-8gb">vc2-4c-8gb (4 vCPU / 8 GB RAM)</option>
@@ -293,7 +293,7 @@ export function VultrInfraModal({
                 type="button"
                 onClick={handleProvision}
                 disabled={provisioning}
-                className="rounded-md bg-[#34D399] hover:bg-[#6EE7B7] text-[#0B0D10] font-semibold px-3 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm disabled:opacity-50"
+                className="rounded-md bg-[#34D399] hover:bg-[#6EE7B7] text-[#191919] font-semibold px-3 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer transition disabled:opacity-40"
               >
                 {provisioning ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -305,24 +305,24 @@ export function VultrInfraModal({
             </div>
 
             {provisionMsg && (
-              <div className="rounded bg-[#0B0D10] border border-[#242830] p-2.5 text-[11px] font-mono text-[#38BDF8]">
+              <div className="rounded bg-[#191919] border border-[#2E2E2E] p-2.5 text-[11px] font-mono text-[#38BDF8]">
                 {provisionMsg}
               </div>
             )}
 
             {overview && overview.instances.length > 0 && (
               <div className="space-y-1.5 pt-2">
-                <div className="text-[11px] text-[#9CA3AF] font-medium">
+                <div className="text-[11px] text-[#888888] font-medium">
                   Active Vultr Cloud Instances:
                 </div>
                 {overview.instances.map((inst) => (
                   <div
                     key={inst.id}
-                    className="rounded bg-[#0B0D10] border border-[#242830] px-3 py-2 flex items-center justify-between text-[11px] font-mono"
+                    className="rounded bg-[#191919] border border-[#2E2E2E] px-3 py-2 flex items-center justify-between text-[11px] font-mono"
                   >
                     <div>
-                      <span className="text-[#F4F4F5] font-medium">{inst.label}</span>{' '}
-                      <span className="text-[#6B7280]">
+                      <span className="text-[#F2F2F2] font-medium">{inst.label}</span>{' '}
+                      <span className="text-[#555555]">
                         ({inst.region} · {inst.plan} · {inst.mainIp})
                       </span>
                     </div>
@@ -339,8 +339,8 @@ export function VultrInfraModal({
             )}
 
             {overview?.sampleCloudInit && (
-              <details className="rounded border border-[#242830] bg-[#0B0D10]">
-                <summary className="px-3 py-2 text-[11px] font-mono text-[#9CA3AF] cursor-pointer flex items-center justify-between">
+              <details className="rounded border border-[#2E2E2E] bg-[#191919]">
+                <summary className="px-3 py-2 text-[11px] font-mono text-[#888888] cursor-pointer flex items-center justify-between">
                   <span>Hardened Vultr Cloud-Init Blueprint (Docker + gVisor + 169.254.169.254 Drop)</span>
                   <button
                     type="button"
@@ -356,7 +356,7 @@ export function VultrInfraModal({
                     <span>{copiedInit ? 'Copied' : 'Copy'}</span>
                   </button>
                 </summary>
-                <pre className="p-3 border-t border-[#242830] text-[10px] font-mono text-[#6B7280] overflow-x-auto max-h-44 leading-relaxed">
+                <pre className="p-3 border-t border-[#2E2E2E] text-[10px] font-mono text-[#555555] overflow-x-auto max-h-44 leading-relaxed">
                   {overview.sampleCloudInit}
                 </pre>
               </details>

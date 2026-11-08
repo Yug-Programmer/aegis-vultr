@@ -293,6 +293,46 @@ summary_md = f"""# Hacker News Live Intelligence Report
 with open("hn_intelligence_briefing.md", "w", encoding="utf-8") as mf:
     mf.write(summary_md)
 
+# Generate Executive PDF Intelligence Report
+def create_pdf(filepath, title, lines):
+    stream = f"BT /F1 16 Tf 45 745 Td ({title}) Tj /F2 10 Tf 0 -24 Td ".encode("latin1")
+    for l in lines:
+        c = l.replace("(", "").replace(")", "").replace("\\\\", "")
+        stream += f"({c}) Tj 0 -16 Td ".encode("latin1")
+    stream += b"ET"
+    obj1 = b"1 0 obj\\n<< /Type /Catalog /Pages 2 0 R >>\\nendobj\\n"
+    obj2 = b"2 0 obj\\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\\nendobj\\n"
+    obj3 = b"3 0 obj\\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>\\nendobj\\n"
+    obj4 = f"4 0 obj\\n<< /Length {len(stream)} >>\\nstream\\n".encode("latin1") + stream + b"\\nendstream\\nendobj\\n"
+    obj5 = b"5 0 obj\\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\\nendobj\\n"
+    obj6 = b"6 0 obj\\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\\nendobj\\n"
+    offsets = [0]
+    body = b"%PDF-1.4\\n"
+    for o in [obj1, obj2, obj3, obj4, obj5, obj6]:
+        offsets.append(len(body))
+        body += o
+    x_off = len(body)
+    xref = b"xref\\n0 7\\n0000000000 65535 f \\n"
+    for off in offsets[1:]:
+        xref += f"{off:010d} 00000 n \\n".encode("latin1")
+    trailer = f"trailer\\n<< /Size 7 /Root 1 0 R >>\\nstartxref\\n{x_off}\\n%%EOF\\n".encode("latin1")
+    with open(filepath, "wb") as pf:
+        pf.write(body + xref + trailer)
+
+pdf_lines = [
+    "AEGIS // VULTR Autonomous Telemetry & Web Mining Report",
+    "-" * 56,
+    f"Stories Analyzed: {len(stories)}",
+    f"Mean Engagement: {statistics.mean(points):.1f} pts | Median: {statistics.median(points):.1f} pts",
+    f"Top Submission: {top_by_points[0]['title'][:44]}",
+    "-" * 56,
+    "TOP 5 RANKED STORIES BY ENGAGEMENT:"
+]
+for idx, s in enumerate(top_by_points[:5]):
+    pdf_lines.append(f"{idx+1}. {s['title'][:44]} [{s['points']} pts]")
+
+create_pdf("hn_executive_report.pdf", "Hacker News Live Executive Intelligence Report", pdf_lines)
+
 print(json.dumps({
     "captured": len(stories),
     "mean_points": round(statistics.mean(points), 2),
@@ -321,7 +361,7 @@ print(json.dumps({
   // Step 4: Verify
   ctx.updateStep('s4', 'running');
   const verifyScript = `import os, json
-required = ["raw_stories.json", "hn_top_stories.csv", "hn_engagement_chart.svg", "hn_intelligence_briefing.md"]
+required = ["raw_stories.json", "hn_top_stories.csv", "hn_engagement_chart.svg", "hn_intelligence_briefing.md", "hn_executive_report.pdf"]
 report = {f: os.path.getsize(f) for f in required if os.path.exists(f)}
 assert len(report) == len(required), f"Missing files: {set(required) - set(report.keys())}"
 assert all(sz > 100 for sz in report.values()), "Empty artifact detected"
@@ -332,7 +372,7 @@ print("VERIFIED_ARTIFACTS:", json.dumps(report))
     filename: 'verify_outputs.py',
     code: verifyScript,
   });
-  ctx.updateStep('s4', 'completed', 'All 4 workspace artifacts verified non-empty & signed');
+  ctx.updateStep('s4', 'completed', 'All 5 workspace artifacts (CSV, JSON, SVG, MD, PDF) verified & signed');
 
   const statsJson = JSON.parse(pyRes.stdout.trim()) as {
     captured: number;

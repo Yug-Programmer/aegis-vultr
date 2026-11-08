@@ -8,6 +8,7 @@ data/
 Thumbs.db
 *.mp4
 *.wav
+*.zip
 scratch/
 temp_slides/
 report_assets/

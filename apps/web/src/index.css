@@ -2,25 +2,31 @@
 
 @layer base {
   :root {
-    --bg-base: #0B0D10;
-    --bg-sidebar: #0D0F12;
-    --bg-surface: #111419;
-    --bg-elevated: #15181E;
-    --border-color: #1E232B;
-    --text-primary: #F4F4F5;
-    --text-secondary: #A1A1AA;
-    --text-muted: #71717A;
+    /* Replit-inspired charcoal color system */
+    --bg-base: #191919;
+    --bg-sidebar: #202020;
+    --bg-surface: #242424;
+    --bg-surface-alt: #1D1D1D;
+    --bg-elevated: #2A2A2A;
+    --border-color: #2E2E2E;
+    --border-subtle: #262626;
+    --text-primary: #F2F2F2;
+    --text-secondary: #A0A0A0;
+    --text-muted: #666666;
     --accent-cyan: #38BDF8;
+    --accent-cyan-dim: rgba(56, 189, 248, 0.08);
+    --accent-green: #34D399;
+    --accent-amber: #FBBF24;
+    --accent-red: #F87171;
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    background-color: #0B0D10;
-    color: #F4F4F5;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
-    letter-spacing: -0.012em;
+    letter-spacing: -0.01em;
     text-rendering: optimizeLegibility;
   }
 
@@ -38,25 +44,50 @@
   table {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Form elements inherit dark theme */
+  input, select, textarea {
+    color-scheme: dark;
+  }
+
+  /* Selection highlight */
+  ::selection {
+    background: rgba(56, 189, 248, 0.2);
+    color: #F2F2F2;
+  }
 }
 
-/* Minimal sleek scrollbars */
+/* Refined scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E232B;
+  background: #333333;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2E3542;
+  background: #444444;
 }
 
-/* Subtle transitions for buttons and links */
+/* Uniform micro-transitions */
 button, a {
   transition: all 120ms ease;
+}
+
+/* Replit-style divider utility */
+.border-replit {
+  border-color: var(--border-color);
+}
+
+/* Status dot pulse animation (restrained) */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
 }

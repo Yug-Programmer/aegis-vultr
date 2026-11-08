@@ -22,14 +22,14 @@ export function PlanTimeline({
   onSelectMission,
 }: PlanTimelineProps) {
   return (
-    <div className="p-4 space-y-4 overflow-y-auto flex-1">
+    <div className="p-4 space-y-4 overflow-y-auto flex-1 bg-[#1D1D1D]">
       <div>
         <div className="flex items-center justify-between mb-2.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF]">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
             Task Execution Plan
           </span>
           {plan.length > 0 && (
-            <span className="text-[11px] font-mono text-[#6B7280]">
+            <span className="text-[11px] font-mono text-[#444444]">
               {plan.filter((s) => s.status === 'completed' || s.status === 'healed').length}/
               {plan.length} verified
             </span>
@@ -37,11 +37,11 @@ export function PlanTimeline({
         </div>
 
         {plan.length === 0 ? (
-          <div className="rounded-md border border-[#242830] bg-[#111419] p-4 text-center text-xs text-[#6B7280]">
+          <div className="rounded-md border border-[#2E2E2E] bg-[#191919] p-4 text-center text-xs text-[#555555]">
             Launch a mission above to generate a multi-step sandbox execution plan.
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {plan.map((step) => {
               const isRunning = step.status === 'running';
               const isCompleted = step.status === 'completed';
@@ -54,14 +54,14 @@ export function PlanTimeline({
                   key={step.id}
                   className={`rounded-md p-2.5 border text-xs transition ${
                     isRunning
-                      ? 'bg-[#15181E] border-[#38BDF8]/40'
+                      ? 'bg-[#242424] border-[#38BDF8]/30'
                       : isCompleted
-                        ? 'bg-[#111419] border-[#242830]'
+                        ? 'bg-[#1D1D1D] border-[#2E2E2E]'
                         : isHealed
-                          ? 'bg-[#111419] border-[#FBBF24]/30'
+                          ? 'bg-[#1D1D1D] border-[#FBBF24]/25'
                           : isBlocked || isFailed
-                            ? 'bg-[#111419] border-[#F87171]/30'
-                            : 'bg-[#0D0F12] border-[#242830]/80'
+                            ? 'bg-[#1D1D1D] border-[#F87171]/25'
+                            : 'bg-[#191919] border-[#2A2A2A]'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
@@ -82,25 +82,25 @@ export function PlanTimeline({
                         <XCircle className="w-3.5 h-3.5 text-[#F87171]" />
                       )}
                       {step.status === 'pending' && (
-                        <Circle className="w-3.5 h-3.5 text-[#6B7280]" />
+                        <Circle className="w-3.5 h-3.5 text-[#444444]" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="font-medium text-[#F4F4F5] leading-snug">
+                        <span className="font-medium text-[#D0D0D0] leading-snug">
                           {step.index}. {step.title}
                         </span>
                         {step.durationMs !== undefined && (
-                          <span className="text-[10px] font-mono text-[#6B7280] shrink-0">
+                          <span className="text-[10px] font-mono text-[#444444] shrink-0">
                             {step.durationMs}ms
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-[#9CA3AF] mt-0.5 leading-snug">
+                      <p className="text-[11px] text-[#777777] mt-0.5 leading-snug">
                         {step.description}
                       </p>
                       {step.verificationNote && (
-                        <div className="mt-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#15181E] text-[#38BDF8] border border-[#242830] inline-block">
+                        <div className="mt-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#242424] text-[#38BDF8] border border-[#2E2E2E] inline-block">
                           {step.verificationNote}
                         </div>
                       )}
@@ -114,8 +114,8 @@ export function PlanTimeline({
       </div>
 
       {missions.length > 0 && (
-        <div className="pt-3 border-t border-[#242830]">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+        <div className="pt-3 border-t border-[#2E2E2E]">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-[#555555] mb-2">
             Session Mission History
           </div>
           <div className="space-y-1">
@@ -125,18 +125,18 @@ export function PlanTimeline({
                 onClick={() => onSelectMission(m.id)}
                 className={`w-full text-left rounded-md px-2.5 py-1.5 border text-xs transition flex items-center justify-between gap-2 cursor-pointer ${
                   m.id === activeMissionId
-                    ? 'bg-[#15181E] border-[#38BDF8]/40 text-[#F4F4F5]'
-                    : 'bg-[#111419] hover:bg-[#15181E] border-[#242830] text-[#9CA3AF]'
+                    ? 'bg-[#242424] border-[#38BDF8]/30 text-[#D0D0D0]'
+                    : 'bg-[#191919] hover:bg-[#242424] border-[#2E2E2E] text-[#777777]'
                 }`}
               >
                 <span className="truncate">{m.prompt}</span>
                 <span
                   className={`text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0 ${
                     m.status === 'completed'
-                      ? 'bg-[#34D399]/15 text-[#34D399]'
+                      ? 'bg-[#34D399]/12 text-[#34D399]'
                       : m.status === 'failed'
-                        ? 'bg-[#F87171]/15 text-[#F87171]'
-                        : 'bg-[#38BDF8]/15 text-[#38BDF8]'
+                        ? 'bg-[#F87171]/12 text-[#F87171]'
+                        : 'bg-[#38BDF8]/12 text-[#38BDF8]'
                   }`}
                 >
                   {m.status}

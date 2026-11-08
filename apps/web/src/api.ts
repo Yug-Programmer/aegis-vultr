@@ -1,9 +1,11 @@
 import type {
   ApprovalItem,
+  ArtifactMeta,
   ChainVerificationResult,
   ContainmentAuditReport,
   ContainmentPolicy,
   EnterpriseOverviewPayload,
+  ExecutionReceipt,
   FinanceInvoice,
   HrCandidate,
   MissionEvent,
@@ -49,6 +51,7 @@ export interface SystemStatusResponse {
   defaultPolicy: ContainmentPolicy;
   templates: MissionTemplate[];
 }
+
 
 export const API_BASE = (((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_URL) || '').replace(/\/+$/, '');
 
@@ -108,46 +111,68 @@ export async function createMission(opts: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(opts),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to start mission');
+  const data = (await res.json()) as { mission?: MissionRecord; error?: string };
+  if (!res.ok || !data.mission) {
+    throw new Error(data.error || `Failed to create mission (${res.status})`);
+  }
   return data.mission;
 }
 
-export async function verifyMission(id: string): Promise<ChainVerificationResult> {
-  const res = await fetch(apiUrl(`/api/missions/${encodeURIComponent(id)}/verify`));
-  if (!res.ok) throw new Error(`Verification failed: ${res.status}`);
-  return (await res.json()) as ChainVerificationResult;
+export interface CodeExecutionResult {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  durationMs: number;
+  receipt?: ExecutionReceipt;
+  artifacts?: ArtifactMeta[];
 }
 
-export async function runContainmentAudit(): Promise<ContainmentAuditReport> {
-  const res = await fetch(apiUrl('/api/containment/audit'), { method: 'POST' });
-  if (!res.ok) throw new Error(`Audit failed: ${res.status}`);
-  const data = (await res.json()) as { report: ContainmentAuditReport };
-  return data.report;
+export async function executeMissionScript(
+  missionId: string,
+  opts: { code: string; language?: 'python' | 'javascript'; filename?: string }
+): Promise<CodeExecutionResult> {
+  try {
+    const res = await fetch(apiUrl(`/api/missions/${encodeURIComponent(missionId)}/exec`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(opts),
+    });
+    const data = await res.json();
+    if (res.ok) return data;
+  } catch {
+    // Fall back to general sandbox execution endpoint
+  }
+  return executeSandboxScript(opts);
 }
 
-export async function fetchVultrOverview(): Promise<VultrOverviewResponse> {
-  const res = await fetch(apiUrl('/api/vultr/overview'));
-  if (!res.ok) throw new Error(`Vultr overview failed: ${res.status}`);
-  return (await res.json()) as VultrOverviewResponse;
+export async function executeSandboxScript(opts: {
+  code: string;
+  language?: 'python' | 'javascript';
+  filename?: string;
+  sandboxId?: string;
+}): Promise<CodeExecutionResult> {
+  const res = await fetch(apiUrl('/api/sandbox/exec'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(opts),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Execution failed');
+  return data;
 }
 
 export function subscribeToMissionEvents(
   missionId: string,
-  onEvent: (event: MissionEvent) => void,
-  onError?: (err: unknown) => void
+  onEvent: (ev: MissionEvent) => void
 ): () => void {
   const es = new EventSource(apiUrl(`/api/missions/${encodeURIComponent(missionId)}/stream`));
   es.onmessage = (msg) => {
     try {
       const parsed = JSON.parse(msg.data) as MissionEvent;
       onEvent(parsed);
-    } catch (e) {
-      onError?.(e);
+    } catch {
+      // ignore heartbeat
     }
-  };
-  es.onerror = (err) => {
-    onError?.(err);
   };
   return () => {
     es.close();
@@ -163,6 +188,19 @@ export async function verifyMissionReceipts(id: string): Promise<ChainVerificati
 export function getArtifactUrl(missionId: string, relativePath: string, download = false): string {
   const dl = download ? '&download=1' : '';
   return apiUrl(`/api/missions/${encodeURIComponent(missionId)}/artifact?path=${encodeURIComponent(relativePath)}${dl}`);
+}
+
+export async function runContainmentAudit(): Promise<ContainmentAuditReport> {
+  const res = await fetch(apiUrl('/api/containment/audit'), { method: 'POST' });
+  const data = (await res.json()) as ContainmentAuditReport & { error?: string };
+  if (!res.ok) throw new Error(data.error || 'Containment audit failed');
+  return data;
+}
+
+export async function fetchVultrOverview(): Promise<VultrOverviewResponse> {
+  const res = await fetch(apiUrl('/api/vultr/overview'));
+  if (!res.ok) throw new Error('Failed to load Vultr overview');
+  return (await res.json()) as VultrOverviewResponse;
 }
 
 export async function saveRuntimeSettings(payload: Record<string, unknown>): Promise<void> {
@@ -194,34 +232,35 @@ export async function provisionVultrSandboxNode(payload: {
   return data;
 }
 
-export function getArtifactDownloadUrl(missionId: string, filename: string): string {
-  return apiUrl(`/api/missions/${encodeURIComponent(missionId)}/artifacts/${encodeURIComponent(filename)}`);
-}
-
-// ==========================================
-// ENTERPRISE WORKFLOWS & DATA ENGINE (5 DEPARTMENTS)
-// ==========================================
-
 export async function fetchEnterpriseOverview(): Promise<EnterpriseOverviewPayload> {
   const res = await fetch(apiUrl('/api/enterprise/overview'));
-  if (!res.ok) throw new Error(`Enterprise overview failed: ${res.status}`);
-  const data = (await res.json()) as { overview: EnterpriseOverviewPayload };
-  return data.overview;
+  if (!res.ok) throw new Error('Failed to load enterprise overview');
+  return (await res.json()) as EnterpriseOverviewPayload;
 }
 
 export async function resetEnterpriseDataset(): Promise<EnterpriseOverviewPayload> {
   const res = await fetch(apiUrl('/api/enterprise/reset'), { method: 'POST' });
-  const data = (await res.json()) as EnterpriseOverviewPayload;
-  return data;
+  if (!res.ok) throw new Error('Failed to reset dataset');
+  return (await res.json()) as EnterpriseOverviewPayload;
 }
 
 export async function clearEnterpriseDataset(): Promise<EnterpriseOverviewPayload> {
   const res = await fetch(apiUrl('/api/enterprise/clear'), { method: 'POST' });
-  const data = (await res.json()) as EnterpriseOverviewPayload;
+  if (!res.ok) throw new Error('Failed to clear dataset');
+  return (await res.json()) as EnterpriseOverviewPayload;
+}
+
+export async function deleteSalesLead(
+  leadId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(apiUrl(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}`), {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete lead');
   return data;
 }
 
-// 1. SALES OPERATIONS
 export async function createSalesLead(payload: {
   company: string;
   domainUrl: string;
@@ -241,17 +280,6 @@ export async function createSalesLead(payload: {
   return data;
 }
 
-export async function deleteSalesLead(
-  leadId: string
-): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(apiUrl(`/api/enterprise/sales/leads/${encodeURIComponent(leadId)}`), {
-    method: 'DELETE',
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to delete lead');
-  return data;
-}
-
 export async function triggerSalesLeadQualification(
   leadId: string
 ): Promise<{ mission: MissionRecord; overview: EnterpriseOverviewPayload }> {
@@ -263,7 +291,17 @@ export async function triggerSalesLeadQualification(
   return data;
 }
 
-// 2. FINANCE & ACCOUNTING
+export async function deleteFinanceInvoice(
+  invoiceId: string
+): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(apiUrl(`/api/enterprise/finance/invoices/${encodeURIComponent(invoiceId)}`), {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete invoice');
+  return data;
+}
+
 export async function createFinanceInvoice(payload: {
   invoiceNumber: string;
   vendorName: string;
@@ -285,17 +323,6 @@ export async function createFinanceInvoice(payload: {
   return data;
 }
 
-export async function deleteFinanceInvoice(
-  invoiceId: string
-): Promise<{ ok: boolean; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(apiUrl(`/api/enterprise/finance/invoices/${encodeURIComponent(invoiceId)}`), {
-    method: 'DELETE',
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to delete invoice');
-  return data;
-}
-
 export async function triggerFinanceReconciliation(): Promise<{
   mission: MissionRecord;
   overview: EnterpriseOverviewPayload;
@@ -303,26 +330,6 @@ export async function triggerFinanceReconciliation(): Promise<{
   const res = await fetch(apiUrl('/api/enterprise/finance/reconcile'), { method: 'POST' });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to launch reconciliation');
-  return data;
-}
-
-// 3. CUSTOMER SUPPORT
-export async function createSupportTicket(payload: {
-  customerName: string;
-  customerTier: 'Enterprise' | 'Growth';
-  subject: string;
-  category?: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security' | 'Performance & Scale' | 'General Operations';
-  priority: 'P1' | 'P2' | 'P3';
-  requestedCreditUsd?: number;
-  diagnosticPayload?: Record<string, unknown>;
-}): Promise<{ ticket: SupportTicket; overview: EnterpriseOverviewPayload }> {
-  const res = await fetch(apiUrl('/api/enterprise/support/tickets'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to create ticket');
   return data;
 }
 
@@ -334,6 +341,24 @@ export async function deleteSupportTicket(
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to delete ticket');
+  return data;
+}
+
+export async function createSupportTicket(payload: {
+  customerName: string;
+  customerTier: 'Enterprise' | 'Growth';
+  subject: string;
+  category: 'API & Webhooks' | 'Billing & Ledger' | 'SSO & Security';
+  priority: 'P1' | 'P2' | 'P3';
+  requestedCreditUsd?: number;
+}): Promise<{ ticket: SupportTicket; overview: EnterpriseOverviewPayload }> {
+  const res = await fetch(apiUrl('/api/enterprise/support/tickets'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to create ticket');
   return data;
 }
 
@@ -439,7 +464,6 @@ export async function triggerProcurementEvaluation(
   return data;
 }
 
-// APPROVALS
 export async function decideApprovalItem(
   approvalId: string,
   decision: 'approved' | 'rejected',
